@@ -24,7 +24,7 @@ public class Pagination<T> implements java.io.Serializable {
 	}
 
 	private Collection<T> items;
-	private Map<String, Object> groupMap;
+	private Map<String, Object> groups;
 	private int total;
 	private int offset;
 	private int limit = DEFAULT_PAGESIZE;
@@ -33,10 +33,10 @@ public class Pagination<T> implements java.io.Serializable {
 		this(new ArrayList<T>(0), null, 0, 0, DEFAULT_PAGESIZE);
 	}
 
-	public Pagination(Collection<T> items, Map<String, Object> groupMap, int total, int offset,
+	public Pagination(Collection<T> items, Map<String, Object> groups, int total, int offset,
 			int limit) {
 		this.items = items;
-		this.groupMap = groupMap;
+		this.groups = groups;
 		this.total = total;
 		this.offset = offset;
 		this.limit = limit <= 0 ? DEFAULT_PAGESIZE : limit;
@@ -58,8 +58,8 @@ public class Pagination<T> implements java.io.Serializable {
 		return limit;
 	}
 
-	public Map<String, Object> getGroupMap() {
-		return groupMap;
+	public Map<String, Object> getGroups() {
+		return groups;
 	}
 
 }

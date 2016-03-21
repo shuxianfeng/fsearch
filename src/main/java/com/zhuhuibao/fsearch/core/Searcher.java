@@ -304,22 +304,18 @@ public class Searcher {
 				}
 				items.add(item);
 			}
-			Map<String, Object> groupMap = new HashMap<String, Object>(0);
+			Map<String, Object> groups = new HashMap<String, Object>(0);
 			if(!items.isEmpty()){
-				Map<String, Object> brandGroup = groupByField(searcher,query,"brandid");
-				if (null != brandGroup){
-					groupMap.put("品牌", brandGroup);
-				}
-				Map<String, Object> scateGroup = groupByField(searcher,query,"scateid");
+				Map<String, Object> scateGroup = groupByField(searcher,query,"scateid1");
 				if (null != scateGroup){
-					groupMap.put("产品分类", scateGroup);
+					groups.put("产品分类", scateGroup);
 				}
-				Map<String, Object> identifyGroup = groupByField(searcher,query,"member_identify");
-				if (null != identifyGroup){
-					groupMap.put("供应商类型", identifyGroup);
+				Map<String, Object> brandGroup = groupByField(searcher,query,"brandid1");
+				if (null != brandGroup){
+					groups.put("品牌", brandGroup);
 				}
 			}
-			return new Pagination<Map<String, Object>>(items, groupMap, total, offset,
+			return new Pagination<Map<String, Object>>(items, groups, total, offset,
 					limit);
 		} finally {
 			close(reader);
@@ -345,21 +341,19 @@ public class Searcher {
 		if(null==result){
 			return null;
 		}
-		Map<String, Object> groupMap = new HashMap<String, Object>(0);
+		Map<String, Object> groups = new HashMap<String, Object>(0);
         for (GroupDocs<BytesRef> groupDocs : result.groups) {
 			String groupId = groupDocs.groupValue.utf8ToString();
 			Document doc = searcher.doc(groupDocs.scoreDocs[0].doc);
 			String groupName="其它";
-			if(groupField.equals("scateid")){
+			if(groupField.equals("scateid1")){
 				groupName = doc.get("scate_name");
-			}else if(groupField.equals("brandid")){
+			}else if(groupField.equals("brandid1")){
 				groupName = doc.get("brand_CNName");
-			}else if(groupField.equals("member_identify")){
-				groupName = doc.get("dic_identify_name");
 			}
-			groupMap.put(groupId, groupName);
+			groups.put(groupId, groupName);
         }
-        return groupMap;
+        return groups;
 	}
 	
 	public Document parseDocument(Map<String, Object> docAsMap) {

@@ -71,12 +71,11 @@ public class ProductIndexer implements Indexer {
 			int total = 0;
 			while (true) {
 				Object[] params = null;
-				String sql = "select p.*, m.enterpriseName member_enterpriseName, m.identify member_identify, m.province member_province, m.city member_city,b.CNName brand_CNName,c.name scate_name,d.name dic_identify_name "
+				String sql = "select p.*, m.enterpriseName member_enterpriseName, m.identify member_identify, m.province member_province, m.city member_city,b.CNName brand_CNName,c.name scate_name "
 						+ " from t_p_product p"
 						+ " left outer join t_m_member m on m.id=p.createid"
 						+ " left outer join t_p_brand b on b.id=p.brandid"
-						+ " left outer join t_p_category c on c.id=p.scateid"
-						+ " left outer join t_dictionary_identity d on d.id=m.identify";
+						+ " left outer join t_p_category c on c.id=p.scateid";
 				if (lastId != null) {
 					params = new Object[] { lastId };
 					sql += " where p.id>?";
@@ -165,6 +164,18 @@ public class ProductIndexer implements Indexer {
 				publishtime = DateTools.dateToString(date, Resolution.SECOND);
 				long lpubtime= Long.valueOf(publishtime);
 				docAsMap.put("publishTime1", lpubtime);
+			}
+		}
+		{
+			int brandid = FormatUtil.parseInteger(docAsMap.get("brandid"));
+			if(brandid > 0){
+				docAsMap.put("brandid1", brandid);
+			}
+		}
+		{
+			int scateid = FormatUtil.parseInteger(docAsMap.get("scateid"));
+			if(scateid > 0){
+				docAsMap.put("scateid1", scateid);
 			}
 		}
 		return docAsMap;
