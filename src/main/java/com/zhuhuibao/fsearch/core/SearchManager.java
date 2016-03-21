@@ -67,6 +67,9 @@ public class SearchManager {
 												.parseBoolean(fieldAsMap
 														.get("generalSearch"));
 									}
+									boolean group = FormatUtil
+											.parseBoolean(fieldAsMap
+													.get("group"));
 									SearchField f = new SearchField();
 									f.setName(name);
 									f.setType(type);
@@ -74,6 +77,7 @@ public class SearchManager {
 									f.setIndex(index);
 									f.setTokenized(tokenized);
 									f.setGeneralSearch(generalSearch);
+									f.setGroup(group);
 									if (!f.isIndex() && !f.isStore()
 											&& !f.isGeneralSearch()) {
 										throw new RuntimeException(

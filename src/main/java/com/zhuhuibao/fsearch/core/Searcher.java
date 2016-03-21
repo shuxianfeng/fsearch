@@ -25,6 +25,7 @@ import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.FloatField;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.LongField;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.DocValuesType;
 import org.apache.lucene.index.IndexOptions;
@@ -39,6 +40,10 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
+import org.apache.lucene.search.grouping.GroupingSearch;
+import org.apache.lucene.search.grouping.TopGroups;
+import org.apache.lucene.search.grouping.GroupDocs;
+import org.apache.lucene.util.BytesRef;
 
 import com.chenlb.mmseg4j.MMSeg;
 import com.chenlb.mmseg4j.Seg;
@@ -299,7 +304,22 @@ public class Searcher {
 				}
 				items.add(item);
 			}
-			return new Pagination<Map<String, Object>>(items, total, offset,
+			Map<String, Object> groupMap = new HashMap<String, Object>(0);
+			if(!items.isEmpty()){
+				Map<String, Object> brandGroup = groupByField(searcher,query,"brandid");
+				if (null != brandGroup){
+					groupMap.put("品牌", brandGroup);
+				}
+				Map<String, Object> scateGroup = groupByField(searcher,query,"scateid");
+				if (null != scateGroup){
+					groupMap.put("产品分类", scateGroup);
+				}
+				Map<String, Object> identifyGroup = groupByField(searcher,query,"member_identify");
+				if (null != identifyGroup){
+					groupMap.put("供应商类型", identifyGroup);
+				}
+			}
+			return new Pagination<Map<String, Object>>(items, groupMap, total, offset,
 					limit);
 		} finally {
 			close(reader);
@@ -307,6 +327,41 @@ public class Searcher {
 		}
 	}
 
+	public Map<String, Object> groupByField(IndexSearcher searcher, Query query, String groupField)
+			throws Exception {
+		if(null==searcher || null==query || null==groupField){
+			return null;
+		}
+		GroupingSearch groupingSearch = new GroupingSearch(groupField);
+		Sort groupSort = Sort.RELEVANCE;
+		groupingSearch.setGroupSort(groupSort);
+		groupingSearch.setFillSortFields(true);
+		groupingSearch.setCachingInMB(4.0, true);
+		groupingSearch.setAllGroups(true);
+		//groupingSearch.setAllGroupHeads(true);
+		groupingSearch.setGroupDocsLimit(10);
+	 
+		TopGroups<BytesRef> result = groupingSearch.search(searcher, query, 0, searcher.getIndexReader().maxDoc());
+		if(null==result){
+			return null;
+		}
+		Map<String, Object> groupMap = new HashMap<String, Object>(0);
+        for (GroupDocs<BytesRef> groupDocs : result.groups) {
+			String groupId = groupDocs.groupValue.utf8ToString();
+			Document doc = searcher.doc(groupDocs.scoreDocs[0].doc);
+			String groupName="其它";
+			if(groupField.equals("scateid")){
+				groupName = doc.get("scate_name");
+			}else if(groupField.equals("brandid")){
+				groupName = doc.get("brand_CNName");
+			}else if(groupField.equals("member_identify")){
+				groupName = doc.get("dic_identify_name");
+			}
+			groupMap.put(groupId, groupName);
+        }
+        return groupMap;
+	}
+	
 	public Document parseDocument(Map<String, Object> docAsMap) {
 		Document doc = new Document();
 		// StringBuilder generalTokenized = options.getGeneralSearchField() ==
@@ -332,6 +387,7 @@ public class Searcher {
 			boolean index = false;
 			boolean generalSearch = false;
 			boolean tokenized = false;
+			boolean group = false;
 			if (field == null) {
 				if (value instanceof Map) {
 					Map<?, ?> valueAsMap = (Map<?, ?>) value;
@@ -353,22 +409,31 @@ public class Searcher {
 					index = field.isIndex();
 					tokenized = field.isTokenized();
 					generalSearch = field.isGeneralSearch();
+					group = field.isGroup();
 					break;
 				}
 				case SearchFieldType.TYPE_INT: {
-					f = new IntField(key, FormatUtil.parseInteger(value),
-							numberFieldType(
-									field.isStore() ? IntField.TYPE_STORED
-											: IntField.TYPE_NOT_STORED,
-									field.isIndex()));
+					if(!field.isGroup()){
+						f = new IntField(key, FormatUtil.parseInteger(value),
+								numberFieldType(
+										field.isStore() ? IntField.TYPE_STORED
+												: IntField.TYPE_NOT_STORED,
+										field.isIndex()));
+					}else{
+						f = new SortedDocValuesField(key, new BytesRef(value.toString()));
+					}
 					break;
 				}
 				case SearchFieldType.TYPE_LONG: {
-					f = new LongField(key, FormatUtil.parseLong(value),
-							numberFieldType(
-									field.isStore() ? LongField.TYPE_STORED
-											: LongField.TYPE_NOT_STORED,
-									field.isIndex()));
+					if(!field.isGroup()){
+						f = new LongField(key, FormatUtil.parseLong(value),
+								numberFieldType(
+										field.isStore() ? LongField.TYPE_STORED
+												: LongField.TYPE_NOT_STORED,
+										field.isIndex()));
+					}else{
+						f = new SortedDocValuesField(key, new BytesRef(value.toString()));
+					}
 					break;
 				}
 				case SearchFieldType.TYPE_FLOAT: {
@@ -397,16 +462,20 @@ public class Searcher {
 					// generalTokenized.append(key).append(":");
 					seg(strValue, tokenSet, tokens);
 				}
-				if (index || store) {
-					FieldType fType = new FieldType();
-					fType.setStored(store);
-					if (index) {
-						fType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
-						fType.setTokenized(tokenized);
-					} else {
-						fType.setIndexOptions(IndexOptions.NONE);
+				if (!group) {
+					if (index || store) {
+						FieldType fType = new FieldType();
+						fType.setStored(store);
+						if (index) {
+							fType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+							fType.setTokenized(tokenized);
+						} else {
+							fType.setIndexOptions(IndexOptions.NONE);
+						}
+						f = new Field(key, strValue, fType);
 					}
-					f = new Field(key, strValue, fType);
+				}else {
+					f = new SortedDocValuesField(key, new BytesRef(strValue));
 				}
 			}
 			if (f == null) {

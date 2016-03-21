@@ -71,14 +71,12 @@ public class ProductIndexer implements Indexer {
 			int total = 0;
 			while (true) {
 				Object[] params = null;
-				/*String sql = "select p.*, m.enterpriseName member_enterpriseName, m.companyIdentify member_companyIdentify, m.province member_province, m.city member_city, b.brandCNName brand_name "
-						+ " from (select * from t_p_product where status=1) p"
-						+ " left outer join t_m_member m on m.id=p.createid"
-						+ " left outer join t_p_brand b on b.id=p.brandid";*/
-				String sql = "select p.*, m.enterpriseName member_enterpriseName, m.companyIdentify member_companyIdentify, m.province member_province, m.city member_city, b.brandCNName brand_brandCNName "
+				String sql = "select p.*, m.enterpriseName member_enterpriseName, m.identify member_identify, m.province member_province, m.city member_city,b.CNName brand_CNName,c.name scate_name,d.name dic_identify_name "
 						+ " from t_p_product p"
 						+ " left outer join t_m_member m on m.id=p.createid"
-						+ " left outer join t_p_brand b on b.id=p.brandid";
+						+ " left outer join t_p_brand b on b.id=p.brandid"
+						+ " left outer join t_p_category c on c.id=p.scateid"
+						+ " left outer join t_dictionary_identity d on d.id=m.identify";
 				if (lastId != null) {
 					params = new Object[] { lastId };
 					sql += " where p.id>?";
@@ -101,6 +99,14 @@ public class ProductIndexer implements Indexer {
 											field.getKey().indexOf('.') + 1);
 						}else if (field.getKey().startsWith("t_p_brand.")) {
 							key = "brand_"
+									+ field.getKey().substring(
+											field.getKey().indexOf('.') + 1);
+						}else if (field.getKey().startsWith("t_p_category.")) {
+							key = "scate_"
+									+ field.getKey().substring(
+											field.getKey().indexOf('.') + 1);
+						}else if (field.getKey().startsWith("t_dictionary_identity.")) {
+							key = "dic_identify_"
 									+ field.getKey().substring(
 											field.getKey().indexOf('.') + 1);
 						}else {
@@ -271,9 +277,7 @@ public class ProductIndexer implements Indexer {
 
 	private Set<String> loadBrandWords() throws Exception {
 		JdbcTemplate template = DataSourceManager.getJdbcTemplate();
-		/*List<String> items = template.findList("select brandCNName from t_p_brand where status=1", null,
-				0, 0, StringPropertyHandler.getInstance());*/
-		List<String> items = template.findList("select brandCNName from t_p_brand", null,
+		List<String> items = template.findList("select CNName from t_p_brand", null,
 				0, 0, StringPropertyHandler.getInstance());
 		Set<String> set = new HashSet<String>(items.size());
 		for (String item : items) {

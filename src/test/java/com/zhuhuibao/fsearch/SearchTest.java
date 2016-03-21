@@ -52,12 +52,12 @@ public class SearchTest extends TestCase {
 				CollectionUtil.arrayAsMap("table", "product", "query",
 						JSONUtil.toJSONString(query)));*/
 		query.put("_s",
-				CollectionUtil.arrayAsMap("type", "phrase", "value", "普利驰"));
+				CollectionUtil.arrayAsMap("type", "phrase", "value", "屏蔽"));
 		request("search",
 				CollectionUtil.arrayAsMap("table", "product", "query",
 						JSONUtil.toJSONString(query)));
 		
-		Map<String, Object> query2 = new HashMap<String, Object>();
+		/*Map<String, Object> query2 = new HashMap<String, Object>();
 		query2.put("_s",
 				CollectionUtil.arrayAsMap("type", "phrase", "value", "国际"));
 		request("search",
@@ -68,6 +68,6 @@ public class SearchTest extends TestCase {
 				CollectionUtil.arrayAsMap("type", "equal", "value", 4));
 		request("search",
 				CollectionUtil.arrayAsMap("table", "product", "query",
-						JSONUtil.toJSONString(query3)));
+						JSONUtil.toJSONString(query3)));*/
 	}
 }

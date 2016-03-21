@@ -7,6 +7,7 @@ public class SearchField {
 	private boolean index = true;
 	private boolean tokenized = true;
 	private boolean generalSearch;
+	private boolean group = false;
 
 	public SearchField() {
 		super();
@@ -58,6 +59,14 @@ public class SearchField {
 
 	public void setGeneralSearch(boolean generalSearch) {
 		this.generalSearch = generalSearch;
+	}
+
+	public boolean isGroup() {
+		return group;
+	}
+
+	public void setGroup(boolean group) {
+		this.group = group;
 	}
 
 }
