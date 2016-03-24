@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,6 +57,8 @@ import com.petkit.base.utils.StringUtil;
 import com.zhuhuibao.fsearch.L;
 import com.zhuhuibao.fsearch.analysis.ComplexAnalyzer;
 import com.zhuhuibao.fsearch.analysis.TokenUtil;
+import com.zhuhuibao.fsearch.core.ProductGroup;
+import com.zhuhuibao.fsearch.core.GroupValue;
 
 public class Searcher {
 	public static final Analyzer ANALYZER = new ComplexAnalyzer();
@@ -246,7 +249,7 @@ public class Searcher {
 		}
 	}
 
-	public Pagination<Map<String, Object>> searchForPage(Query query,
+	public Pagination<Map<String, Object>,ProductGroup> searchForPage(Query query,
 			SortField[] sortFields, Collection<String> fields, int offset,
 			int limit) throws Exception {
 		int maxDocs = options.getMaxDocsOfQuery();
@@ -304,18 +307,18 @@ public class Searcher {
 				}
 				items.add(item);
 			}
-			Map<String, Object> groups = new HashMap<String, Object>(0);
+			List<ProductGroup> productGroups = new ArrayList<ProductGroup>();
 			if(!items.isEmpty()){
-				Map<String, Object> scateGroup = groupByField(searcher,query,"scateid1");
+				ProductGroup scateGroup = groupByField(searcher,query,"scateid1");
 				if (null != scateGroup){
-					groups.put("产品分类", scateGroup);
+					productGroups.add(scateGroup);
 				}
-				Map<String, Object> brandGroup = groupByField(searcher,query,"brandid1");
+				ProductGroup brandGroup = groupByField(searcher,query,"brandid1");
 				if (null != brandGroup){
-					groups.put("品牌", brandGroup);
+					productGroups.add(brandGroup);
 				}
 			}
-			return new Pagination<Map<String, Object>>(items, groups, total, offset,
+			return new Pagination<Map<String, Object>,ProductGroup>(items, productGroups, total, offset,
 					limit);
 		} finally {
 			close(reader);
@@ -323,7 +326,7 @@ public class Searcher {
 		}
 	}
 
-	public Map<String, Object> groupByField(IndexSearcher searcher, Query query, String groupField)
+	public ProductGroup groupByField(IndexSearcher searcher, Query query, String groupField)
 			throws Exception {
 		if(null==searcher || null==query || null==groupField){
 			return null;
@@ -338,10 +341,20 @@ public class Searcher {
 		groupingSearch.setGroupDocsLimit(10);
 	 
 		TopGroups<BytesRef> result = groupingSearch.search(searcher, query, 0, searcher.getIndexReader().maxDoc());
-		if(null==result){
+		if(null==result || 0==result.groups.length){
 			return null;
 		}
-		Map<String, Object> groups = new HashMap<String, Object>(0);
+		
+		ProductGroup productGroup = new ProductGroup();
+		if(groupField.equals("scateid1")){
+			productGroup.setKey("scateid");
+			productGroup.setName("产品分类");
+		}else if(groupField.equals("brandid1")){
+			productGroup.setKey("brandid");
+			productGroup.setName("品牌");
+		}
+
+		List<GroupValue> values = new ArrayList<GroupValue>();
         for (GroupDocs<BytesRef> groupDocs : result.groups) {
 			String groupId = groupDocs.groupValue.utf8ToString();
 			Document doc = searcher.doc(groupDocs.scoreDocs[0].doc);
@@ -351,9 +364,10 @@ public class Searcher {
 			}else if(groupField.equals("brandid1")){
 				groupName = doc.get("brand_CNName");
 			}
-			groups.put(groupId, groupName);
+			values.add(new GroupValue(groupId,groupName));
         }
-        return groups;
+        productGroup.setValues(values);
+        return productGroup;
 	}
 	
 	public Document parseDocument(Map<String, Object> docAsMap) {

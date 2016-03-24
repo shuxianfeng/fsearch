@@ -104,10 +104,6 @@ public class ProductIndexer implements Indexer {
 							key = "scate_"
 									+ field.getKey().substring(
 											field.getKey().indexOf('.') + 1);
-						}else if (field.getKey().startsWith("t_dictionary_identity.")) {
-							key = "dic_identify_"
-									+ field.getKey().substring(
-											field.getKey().indexOf('.') + 1);
 						}else {
 							key = field.getKey().substring(
 									field.getKey().indexOf('.') + 1);
@@ -145,20 +141,20 @@ public class ProductIndexer implements Indexer {
 	public Map<String, Object> parseRawDocument(Map<String, Object> docAsMap)
 			throws Exception {
 		String paramValues = FormatUtil.parseString(docAsMap.get("paramValues"));
-		if (paramValues != null && !paramValues.isEmpty()) {
+		if (null != paramValues  && !paramValues.isEmpty()){
 			paramValues.replaceAll(Searcher.SPLIT, Searcher.TOKEN);
 			docAsMap.put("_p", paramValues.toString());
 		}
 		{
 			Float price = FormatUtil.parseFloat(docAsMap.get("price"));
-			if (price == null || price.floatValue() < 0) {
+			if (null == price || price.floatValue() < 0){
 				price = Float.MAX_VALUE;
 			}
 			docAsMap.put("price1", price);
 		}
 		{
 			String publishtime = FormatUtil.parseString(docAsMap.get("publishTime"));
-			if( null!=publishtime && publishtime.length()>0 ){
+			if(null != publishtime && publishtime.length() > 0 ){
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Date date = sdf.parse(publishtime);
 				publishtime = DateTools.dateToString(date, Resolution.SECOND);
@@ -167,14 +163,14 @@ public class ProductIndexer implements Indexer {
 			}
 		}
 		{
-			int brandid = FormatUtil.parseInteger(docAsMap.get("brandid"));
-			if(brandid > 0){
+			Integer brandid = FormatUtil.parseInteger(docAsMap.get("brandid"));
+			if(null != brandid && brandid.intValue() > 0){
 				docAsMap.put("brandid1", brandid);
 			}
 		}
 		{
-			int scateid = FormatUtil.parseInteger(docAsMap.get("scateid"));
-			if(scateid > 0){
+			Integer scateid = FormatUtil.parseInteger(docAsMap.get("scateid"));
+			if(null != scateid && scateid.intValue() > 0){
 				docAsMap.put("scateid1", scateid);
 			}
 		}
