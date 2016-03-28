@@ -72,7 +72,7 @@ public class ProductIndexer implements Indexer {
 			while (true) {
 				Object[] params = null;
 				String sql = "select p.*, m.enterpriseName member_enterpriseName, m.identify member_identify, m.province member_province, m.city member_city,b.CNName brand_CNName,c.name scate_name "
-						+ " from t_p_product p"
+						+ " from (select * from t_p_product where status=1) p"
 						+ " left outer join t_m_member m on m.id=p.createid"
 						+ " left outer join t_p_brand b on b.id=p.brandid"
 						+ " left outer join t_p_category c on c.id=p.scateid";
@@ -284,7 +284,7 @@ public class ProductIndexer implements Indexer {
 
 	private Set<String> loadBrandWords() throws Exception {
 		JdbcTemplate template = DataSourceManager.getJdbcTemplate();
-		List<String> items = template.findList("select CNName from t_p_brand", null,
+		List<String> items = template.findList("select CNName from t_p_brand where status=1", null,
 				0, 0, StringPropertyHandler.getInstance());
 		Set<String> set = new HashSet<String>(items.size());
 		for (String item : items) {

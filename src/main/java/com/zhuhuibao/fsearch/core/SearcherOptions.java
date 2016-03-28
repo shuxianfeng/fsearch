@@ -17,6 +17,7 @@ public class SearcherOptions {
 	private String fullIndexer;
 	private boolean fullIndexAtStart;
 	private int fullIndexInterval;
+	private int groupItemCount;
 
 	private void renderFieldInfo() {
 		fieldMap = new HashMap<String, SearchField>(fields.size());
@@ -107,6 +108,14 @@ public class SearcherOptions {
 
 	public void setFullIndexAtStart(boolean fullIndexAtStart) {
 		this.fullIndexAtStart = fullIndexAtStart;
+	}
+
+	public int getGroupItemCount() {
+		return groupItemCount;
+	}
+
+	public void setGroupItemCount(int groupItemCount) {
+		this.groupItemCount = groupItemCount;
 	}
 
 }

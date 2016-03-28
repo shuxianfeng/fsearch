@@ -52,7 +52,7 @@ public class SearchTest extends TestCase {
 				CollectionUtil.arrayAsMap("table", "product", "query",
 						JSONUtil.toJSONString(query)));*/
 		query.put("_s",
-				CollectionUtil.arrayAsMap("type", "phrase", "value", "屏蔽"));
+				CollectionUtil.arrayAsMap("type", "phrase", "value", "华为"));
 		request("search",
 				CollectionUtil.arrayAsMap("table", "product", "query",
 						JSONUtil.toJSONString(query)));

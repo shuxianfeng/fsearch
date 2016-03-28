@@ -353,18 +353,25 @@ public class Searcher {
 			productGroup.setKey("brandid");
 			productGroup.setName("品牌");
 		}
-
+		int groupItemCount = options.getGroupItemCount();
+		int index = 0;
 		List<GroupValue> values = new ArrayList<GroupValue>();
         for (GroupDocs<BytesRef> groupDocs : result.groups) {
-			String groupId = groupDocs.groupValue.utf8ToString();
-			Document doc = searcher.doc(groupDocs.scoreDocs[0].doc);
-			String groupName="其它";
-			if(groupField.equals("scateid1")){
-				groupName = doc.get("scate_name");
-			}else if(groupField.equals("brandid1")){
-				groupName = doc.get("brand_CNName");
-			}
-			values.add(new GroupValue(groupId,groupName));
+        	index++;
+        	if(index <= groupItemCount){
+    			String groupId = groupDocs.groupValue.utf8ToString();
+    			Document doc = searcher.doc(groupDocs.scoreDocs[0].doc);
+    			String groupName="其它";
+    			if(groupField.equals("scateid1")){
+    				groupName = doc.get("scate_name");
+    			}else if(groupField.equals("brandid1")){
+    				groupName = doc.get("brand_CNName");
+    			}
+    			values.add(new GroupValue(groupId,groupName));
+        	}else{
+        		break;
+        	}
+
         }
         productGroup.setValues(values);
         return productGroup;
