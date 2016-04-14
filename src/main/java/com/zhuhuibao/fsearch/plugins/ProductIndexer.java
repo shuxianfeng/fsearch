@@ -25,8 +25,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
 
 import com.petkit.base.config.PropertiesConfig;
-import com.petkit.base.location.AddressWithCode;
-import com.petkit.base.location.LocationUtil;
 import com.petkit.base.repository.db.JdbcTemplate;
 import com.petkit.base.repository.db.MapHandler;
 import com.petkit.base.repository.db.MultiTableMapHandler;
@@ -57,14 +55,6 @@ public class ProductIndexer implements Indexer {
 		Directory directory = SimpleFSDirectory.open(path);
 
 		try {
-			//PROPS_BY_CAT = findProperties();
-			//CATS = findCats();
-
-			List<SearchField> fields = options.getFields();
-			List<String> fieldNames = new ArrayList<String>(fields.size());
-			for (SearchField field : fields) {
-				fieldNames.add(field.getName());
-			}
 			int batch = 300;
 			Object lastId = null;
 			JdbcTemplate template = DataSourceManager.getJdbcTemplate();

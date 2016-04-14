@@ -51,11 +51,11 @@ public class SearchTest extends TestCase {
 		request("search",
 				CollectionUtil.arrayAsMap("table", "product", "query",
 						JSONUtil.toJSONString(query)));*/
-		query.put("_s",
+		/*query.put("_s",
 				CollectionUtil.arrayAsMap("type", "phrase", "value", "华为"));
 		request("search",
 				CollectionUtil.arrayAsMap("table", "product", "query",
-						JSONUtil.toJSONString(query)));
+						JSONUtil.toJSONString(query)));*/
 		
 		/*Map<String, Object> query2 = new HashMap<String, Object>();
 		query2.put("_s",
@@ -69,5 +69,33 @@ public class SearchTest extends TestCase {
 		request("search",
 				CollectionUtil.arrayAsMap("table", "product", "query",
 						JSONUtil.toJSONString(query3)));*/
+		
+		query.put("_s",
+				CollectionUtil.arrayAsMap("type", "phrase", "value", "江苏南工建设工程有限公司"));
+		request("search",
+				CollectionUtil.arrayAsMap("table", "contractor", "query",
+						JSONUtil.toJSONString(query)));
+		
+		Map<String, Object> query2 = new HashMap<String, Object>();
+		query2.put("province",
+				CollectionUtil.arrayAsMap("type", "equal", "value", "120000"));
+		request("search",
+				CollectionUtil.arrayAsMap("table", "contractor", "query",
+						JSONUtil.toJSONString(query2)));
+		
+		Map<String, Object> query3 = new HashMap<String, Object>();
+		query3.put("_s",
+				CollectionUtil.arrayAsMap("type", "phrase", "value", "海康"));
+		request("search",
+				CollectionUtil.arrayAsMap("table", "product", "query",
+						JSONUtil.toJSONString(query3)));
+		
+		Map<String, Object> query4 = new HashMap<String, Object>();
+		query4.put("涉及国家秘密的计算机信息系统集成甲级",
+				CollectionUtil.arrayAsMap("type", "equal", "value", "涉及国家秘密的计算机信息系统集成甲级"));
+		request("search",
+				CollectionUtil.arrayAsMap("table", "contractor", "query",
+						JSONUtil.toJSONString(query4)));
+		
 	}
 }

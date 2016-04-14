@@ -307,19 +307,24 @@ public class Searcher {
 				}
 				items.add(item);
 			}
-			List<ProductGroup> productGroups = new ArrayList<ProductGroup>();
-			if(!items.isEmpty()){
-				ProductGroup scateGroup = groupByField(searcher,query,"scateid1");
-				if (null != scateGroup){
-					productGroups.add(scateGroup);
+			if (options.getName().equals("product")) {
+				List<ProductGroup> productGroups = new ArrayList<ProductGroup>();
+				if(!items.isEmpty()){
+					ProductGroup scateGroup = groupByField(searcher,query,"scateid1");
+					if (null != scateGroup){
+						productGroups.add(scateGroup);
+					}
+					ProductGroup brandGroup = groupByField(searcher,query,"brandid1");
+					if (null != brandGroup){
+						productGroups.add(brandGroup);
+					}
 				}
-				ProductGroup brandGroup = groupByField(searcher,query,"brandid1");
-				if (null != brandGroup){
-					productGroups.add(brandGroup);
-				}
+				return new Pagination<Map<String, Object>,ProductGroup>(items, productGroups, total, offset,
+						limit);
+			}else {
+				return new Pagination<Map<String, Object>,ProductGroup>(items, null, total, offset,
+						limit);
 			}
-			return new Pagination<Map<String, Object>,ProductGroup>(items, productGroups, total, offset,
-					limit);
 		} finally {
 			close(reader);
 			close(directory);
