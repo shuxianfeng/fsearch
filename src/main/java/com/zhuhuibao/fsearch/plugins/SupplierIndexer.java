@@ -38,7 +38,7 @@ import com.zhuhuibao.fsearch.core.SearchField;
 import com.zhuhuibao.fsearch.core.Searcher;
 import com.zhuhuibao.fsearch.core.SearcherOptions;
 
-public class ContractorIndexer implements Indexer {
+public class SupplierIndexer implements Indexer {
 
 	@Override
 	public Path fullIndex(Searcher searcher) throws Exception {
@@ -57,10 +57,10 @@ public class ContractorIndexer implements Indexer {
 			int total = 0;
 			while (true) {
 				Object[] params = null;
-				String sql = "select id,mobile,email,registerTime,if(status=5,'已认证','未认证') authinfo,enterpriseName,province,address,enterpriseType,"
+				String sql = "select id,mobile,email,registerTime,if(status=5,'已认证','未认证') authinfo,identify,enterpriseName,province,address,enterpriseType,"
 						+ "enterpriseLogo,enterpriseDesc,saleProductDesc,employeeNumber,enterpriseWebSite,enterpriseLinkman"
 						+ " from t_m_member"
-						+ " where status>=3 and workType=100 and enterpriseEmployeeParentId=0 and identify like '%6%'";
+						+ " where status>=3 and workType=100 and enterpriseEmployeeParentId=0 and (identify like '%3%' or  identify like '%4%'  or identify like '%5%')";
 				if (lastId != null) {
 					params = new Object[] { lastId };
 					sql += " and id>?";
@@ -81,8 +81,18 @@ public class ContractorIndexer implements Indexer {
 							docAsMap.put(assetlevel, assetlevel);
 						}
 						if (L.isInfoEnabled()) {
-							L.info(this.getClass() + "-----------caijl:contractor.assetlevels= "
+							L.info(this.getClass() + "-----------caijl:supplier.assetlevels= "
 									+ StringUtil.join(assetlevels, ","));
+						}
+					}
+					Set<String> categorys = findCategory(id);
+					if (CollectionUtil.isNotEmpty(categorys)) {
+						for(String category : categorys){
+							docAsMap.put(category, category);
+						}
+						if (L.isInfoEnabled()) {
+							L.info(this.getClass() + "-----------caijl:supplier.categorys= "
+									+ StringUtil.join(categorys, ","));
 						}
 					}
 					Map<String, Object> doc = new HashMap<String, Object>();
@@ -113,13 +123,27 @@ public class ContractorIndexer implements Indexer {
 	@Override
 	public Map<String, Object> parseRawDocument(Map<String, Object> docAsMap)
 			throws Exception {
-		String registerTime = FormatUtil.parseString(docAsMap.get("registerTime"));
-		if(null != registerTime && registerTime.length() > 0 ){
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date date = sdf.parse(registerTime);
-			registerTime = DateTools.dateToString(date, Resolution.SECOND);
-			long lregtime= Long.valueOf(registerTime);
-			docAsMap.put("registerTime1", lregtime);
+		{
+			String registerTime = FormatUtil.parseString(docAsMap.get("registerTime"));
+			if(null != registerTime && registerTime.length() > 0 ){
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				Date date = sdf.parse(registerTime);
+				registerTime = DateTools.dateToString(date, Resolution.SECOND);
+				long lregtime= Long.valueOf(registerTime);
+				docAsMap.put("registerTime1", lregtime);
+			}
+		}
+		{
+			String identify = FormatUtil.parseString(docAsMap.get("identify"));
+			if( identify.contains("3") ) {
+				docAsMap.put("3", "3");
+			}
+			if( identify.contains("4") ) {
+				docAsMap.put("4", "4");
+			}
+			if( identify.contains("5") ) {
+				docAsMap.put("5", "5");
+			}
 		}
 		return docAsMap;
 	}
@@ -137,9 +161,9 @@ public class ContractorIndexer implements Indexer {
 		Set<String> keys = new HashSet<String>();
 		while (true) {
 			Object[] params = null;
-			String sql = "select id,certificate_name,certificate_grade"
+			String sql = "select id,certificate_name"
 					+ " from t_certificate_record"
-					+ " where type='2' and is_deleted=0 and status=1 and mem_id=?";
+					+ " where type='1' and is_deleted=0 and status=1 and mem_id=?";
 			if (lastId != null) {
 				params = new Object[] { memberId, lastId };
 				sql += " and id>?";
@@ -155,10 +179,38 @@ public class ContractorIndexer implements Indexer {
 			lastId = docs.get(docs.size() - 1).get("id");
 			for (Map<String, Object> doc : docs) {
 				String assetLevel = FormatUtil.parseString(doc.get("certificate_name"));
-				if( doc.get("certificate_grade") != null){
-					assetLevel += FormatUtil.parseString(doc.get("certificate_grade"));
-				}
 				keys.add(assetLevel);
+			}
+		}
+		return keys;
+	}
+	
+	public Set<String> findCategory(Long memberId) throws Exception {
+		Object lastId = null;
+		JdbcTemplate template = DataSourceManager.getJdbcTemplate();
+		int batch = 100;
+		Set<String> keys = new HashSet<String>();
+		while (true) {
+			Object[] params = null;
+			String sql = "select c.id,c.name"
+					+ " from t_p_category c,(select distinct scateid from t_p_product where status=1 and createid=?) p"
+					+ " where c.id=p.scateid";
+			if (lastId != null) {
+				params = new Object[] { memberId, lastId };
+				sql += " and c.id>?";
+			} else {
+				params = new Object[] { memberId };
+			}
+			sql += " order by c.id asc";
+			List<Map<String, Object>> docs = template.findList(sql, params, 0,
+					batch, MultiTableMapHandler.CASESENSITIVE);
+			if (docs.isEmpty()) {
+				break;
+			}
+			lastId = docs.get(docs.size() - 1).get("t_p_category.id");
+			for (Map<String, Object> doc : docs) {
+				String categoryName = FormatUtil.parseString(doc.get("t_p_category.name"));
+				keys.add(categoryName);
 			}
 		}
 		return keys;

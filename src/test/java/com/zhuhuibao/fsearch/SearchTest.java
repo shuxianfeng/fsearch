@@ -97,5 +97,19 @@ public class SearchTest extends TestCase {
 				CollectionUtil.arrayAsMap("table", "contractor", "query",
 						JSONUtil.toJSONString(query4)));
 		
+		Map<String, Object> query5 = new HashMap<String, Object>();
+		query5.put("4",
+				CollectionUtil.arrayAsMap("type", "equal", "value", "4"));
+		request("search",
+				CollectionUtil.arrayAsMap("table", "supplier", "query",
+						JSONUtil.toJSONString(query5)));
+		
+		Map<String, Object> query6 = new HashMap<String, Object>();
+		query6.put("守合同重信用企业",
+				CollectionUtil.arrayAsMap("type", "equal", "value", "南京"));
+		request("search",
+				CollectionUtil.arrayAsMap("table", "supplier", "query",
+						JSONUtil.toJSONString(query6)));
+		
 	}
 }
