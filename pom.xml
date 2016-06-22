@@ -168,13 +168,13 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<cfg.portablePath>src/main/portable/development</cfg.portablePath>
+				<cfg.portablePath>src/main/resources</cfg.portablePath>
 			</properties>
 		</profile>
 		<profile>
 			<id>production</id>
 			<properties>
-				<cfg.portablePath>/data/fsearch/etc</cfg.portablePath>
+				<cfg.portablePath>/zhb/etc/fsearch</cfg.portablePath>
 			</properties>
 		</profile>
 	</profiles>
