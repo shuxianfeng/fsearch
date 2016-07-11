@@ -46,6 +46,7 @@ public class ProductIndexer implements Indexer {
 
 	@Override
 	public Path fullIndex(Searcher searcher) throws Exception {
+
 		SearcherOptions options = searcher.getOptions();
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 		File dir = new File(options.getPath() + "-"

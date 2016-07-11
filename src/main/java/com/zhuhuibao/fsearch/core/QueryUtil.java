@@ -36,7 +36,7 @@ public class QueryUtil {
 		if (queryAsMap == null || queryAsMap.isEmpty()) {
 			return new MatchAllDocsQuery();
 		}
-		List<Query> queries = new ArrayList<Query>(queryAsMap.size());
+		List<Query> queries = new ArrayList<>(queryAsMap.size());
 		for (Entry<String, Object> entry : queryAsMap.entrySet()) {
 			String field = entry.getKey();
 			Object value = entry.getValue();
@@ -44,99 +44,101 @@ public class QueryUtil {
 				throw new ArgumentApiException("query");
 			}
 			Map<?, ?> valueAsMap = (Map<?, ?>) value;
-			Query query = null;
+			Query query;
 			String type = FormatUtil.parseString(valueAsMap.get("type"));
 			value = valueAsMap.get("value");
 			SearchField sField = searcher.getOptions().findField(field);
 			if (sField == null) {
 				sField = DEFAULT_SEARCH_FIELD;
 			}
-			if (type.equals("equal")) {
-				if (sField.getType() == SearchFieldType.TYPE_STRING) {
-					query = new TermQuery(new Term(field, value.toString()));
-				} else if (sField.getType() == SearchFieldType.TYPE_INT) {
-					int intValue = FormatUtil.parseInteger(value).intValue();
-					query = NumericRangeQuery.newIntRange(field, intValue,
-							intValue, true, true);
-				} else if (sField.getType() == SearchFieldType.TYPE_LONG) {
-					long longValue = FormatUtil.parseLong(value).longValue();
-					query = NumericRangeQuery.newLongRange(field, longValue,
-							longValue, true, true);
-				} else if (sField.getType() == SearchFieldType.TYPE_FLOAT) {
-					float floatValue = FormatUtil.parseFloat(value)
-							.floatValue();
-					query = NumericRangeQuery.newFloatRange(field, floatValue,
-							floatValue, true, true);
-				} else if (sField.getType() == SearchFieldType.TYPE_DOUBLE) {
-					double doubleValue = FormatUtil.parseFloat(value)
-							.floatValue();
-					query = NumericRangeQuery.newDoubleRange(field,
-							doubleValue, doubleValue, true, true);
-				} else {
-					throw new ArgumentApiException("query");
-				}
-			} else if (type.equals("numberrange")) {
-				boolean minInclusive = FormatUtil.parseBoolean(valueAsMap
-						.get("minInclusive"));
-				boolean maxInclusive = FormatUtil.parseBoolean(valueAsMap
-						.get("maxInclusive"));
-				if (sField.getType() == SearchFieldType.TYPE_INT) {
-					query = NumericRangeQuery.newIntRange(field,
-							FormatUtil.parseInteger(valueAsMap.get("min")),
-							FormatUtil.parseInteger(valueAsMap.get("max")),
-							minInclusive, maxInclusive);
-				} else if (sField.getType() == SearchFieldType.TYPE_LONG) {
-					query = NumericRangeQuery.newLongRange(field,
-							FormatUtil.parseLong(valueAsMap.get("min")),
-							FormatUtil.parseLong(valueAsMap.get("max")),
-							minInclusive, maxInclusive);
-				} else if (sField.getType() == SearchFieldType.TYPE_FLOAT) {
-					query = NumericRangeQuery.newFloatRange(field,
-							FormatUtil.parseFloat(valueAsMap.get("min")),
-							FormatUtil.parseFloat(valueAsMap.get("max")),
-							minInclusive, maxInclusive);
-				} else if (sField.getType() == SearchFieldType.TYPE_LONG) {
-					query = NumericRangeQuery.newDoubleRange(field,
-							FormatUtil.parseDouble(valueAsMap.get("min")),
-							FormatUtil.parseDouble(valueAsMap.get("max")),
-							minInclusive, maxInclusive);
-				} else {
-					throw new ArgumentApiException("query");
-				}
-			} else if (type.equals("phrase")) {
-				MMSeg mmSeg = new MMSeg(new StringReader(value.toString()),
-						TokenUtil.getComplexSeg());
-				Word word = null;
-				BooleanQuery phraseQuery = new BooleanQuery();
-				// PhraseQuery phraseQuery = new PhraseQuery();
-				// phraseQuery.setSlop(Integer.MAX_VALUE);
-				while ((word = mmSeg.next()) != null) {
-					String w = word.getString();
-					List<String> similarWords = SimilarWordManager
-							.findSimilarWords(w);
-					Query q = null;
-					if (CollectionUtil.isEmpty(similarWords)) {
-						q = new TermQuery(new Term(field, w));
+			switch (type) {
+				case "equal":
+					if (sField.getType() == SearchFieldType.TYPE_STRING) {
+						query = new TermQuery(new Term(field, value.toString()));
+					} else if (sField.getType() == SearchFieldType.TYPE_INT) {
+						int intValue = FormatUtil.parseInteger(value);
+						query = NumericRangeQuery.newIntRange(field, intValue,
+								intValue, true, true);
+					} else if (sField.getType() == SearchFieldType.TYPE_LONG) {
+						long longValue = FormatUtil.parseLong(value);
+						query = NumericRangeQuery.newLongRange(field, longValue,
+								longValue, true, true);
+					} else if (sField.getType() == SearchFieldType.TYPE_FLOAT) {
+						float floatValue = FormatUtil.parseFloat(value);
+						query = NumericRangeQuery.newFloatRange(field, floatValue,
+								floatValue, true, true);
+					} else if (sField.getType() == SearchFieldType.TYPE_DOUBLE) {
+						double doubleValue = FormatUtil.parseFloat(value);
+						query = NumericRangeQuery.newDoubleRange(field,
+								doubleValue, doubleValue, true, true);
 					} else {
-						BooleanQuery bq = new BooleanQuery();
-						bq.setMinimumNumberShouldMatch(1);
-						for (String similarWord : similarWords) {
-							bq.add(new TermQuery(new Term(field, similarWord)),
-									BooleanClause.Occur.SHOULD);
-						}
-						q = bq;
+						throw new ArgumentApiException("query");
 					}
-					phraseQuery.add(q, BooleanClause.Occur.MUST);
-				}
-				if (phraseQuery.getClauses().length == 1) {
-					query = phraseQuery.getClauses()[0].getQuery();
-				} else {
-					query = phraseQuery;
-				}
-				// QueryBuilder qBuilder = new QueryBuilder(Searcher.ANALYZER);
-				// query = qBuilder.createPhraseQuery(field, value.toString());
-			} else {
-				throw new ArgumentApiException("query");
+					break;
+				case "numberrange":
+					boolean minInclusive = FormatUtil.parseBoolean(valueAsMap
+							.get("minInclusive"));
+					boolean maxInclusive = FormatUtil.parseBoolean(valueAsMap
+							.get("maxInclusive"));
+					if (sField.getType() == SearchFieldType.TYPE_INT) {
+						query = NumericRangeQuery.newIntRange(field,
+								FormatUtil.parseInteger(valueAsMap.get("min")),
+								FormatUtil.parseInteger(valueAsMap.get("max")),
+								minInclusive, maxInclusive);
+					} else if (sField.getType() == SearchFieldType.TYPE_LONG) {
+						query = NumericRangeQuery.newLongRange(field,
+								FormatUtil.parseLong(valueAsMap.get("min")),
+								FormatUtil.parseLong(valueAsMap.get("max")),
+								minInclusive, maxInclusive);
+					} else if (sField.getType() == SearchFieldType.TYPE_FLOAT) {
+						query = NumericRangeQuery.newFloatRange(field,
+								FormatUtil.parseFloat(valueAsMap.get("min")),
+								FormatUtil.parseFloat(valueAsMap.get("max")),
+								minInclusive, maxInclusive);
+					} else if (sField.getType() == SearchFieldType.TYPE_DOUBLE) {
+						query = NumericRangeQuery.newDoubleRange(field,
+								FormatUtil.parseDouble(valueAsMap.get("min")),
+								FormatUtil.parseDouble(valueAsMap.get("max")),
+								minInclusive, maxInclusive);
+					} else {
+						throw new ArgumentApiException("query");
+					}
+					break;
+				case "phrase":
+					MMSeg mmSeg = new MMSeg(new StringReader(value.toString()),
+							TokenUtil.getComplexSeg());
+					Word word;
+					BooleanQuery phraseQuery = new BooleanQuery();
+					// PhraseQuery phraseQuery = new PhraseQuery();
+					// phraseQuery.setSlop(Integer.MAX_VALUE);
+					while ((word = mmSeg.next()) != null) {
+						String w = word.getString();
+						List<String> similarWords = SimilarWordManager
+								.findSimilarWords(w);
+						Query q;
+						if (CollectionUtil.isEmpty(similarWords)) {
+							q = new TermQuery(new Term(field, w));
+						} else {
+							BooleanQuery bq = new BooleanQuery();
+							bq.setMinimumNumberShouldMatch(1);
+							for (String similarWord : similarWords) {
+								bq.add(new TermQuery(new Term(field, similarWord)),
+										BooleanClause.Occur.SHOULD);
+							}
+							q = bq;
+						}
+						phraseQuery.add(q, BooleanClause.Occur.MUST);
+					}
+					if (phraseQuery.getClauses().length == 1) {
+						query = phraseQuery.getClauses()[0].getQuery();
+					} else {
+						query = phraseQuery;
+					}
+					// QueryBuilder qBuilder = new QueryBuilder(Searcher.ANALYZER);
+					// query = qBuilder.createPhraseQuery(field, value.toString());
+					break;
+				default:
+					throw new ArgumentApiException("query");
 			}
 			queries.add(query);
 		}
@@ -155,7 +157,7 @@ public class QueryUtil {
 		SortField[] sortFields = null;
 		if (CollectionUtil.isNotEmpty(sorts)) {
 			sortFields = new SortField[sorts.size()];
-			Set<String> fields = new HashSet<String>(sorts.size());
+			Set<String> fields = new HashSet<>(sorts.size());
 			int i = 0;
 			for (Object sort : sorts) {
 				Map<?, ?> sortAsMap = (Map<?, ?>) sort;

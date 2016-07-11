@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.zhuhuibao.fsearch.service.dao.MemberDao;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
@@ -145,6 +146,18 @@ public class SupplierIndexer implements Indexer {
 				docAsMap.put("5", "5");
 			}
 		}
+		//viplevel
+		{
+			MemberDao memberDao = new MemberDao();
+			String memberId = FormatUtil.parseString(docAsMap.get("id"));
+			Map<String,Object> vipmember = memberDao.findVipMember(memberId);
+			if(vipmember != null){
+				String vipLevel = FormatUtil.parseString(vipmember.get("vip_level"));
+				docAsMap.put("viplevel",vipLevel);
+			} else{
+				docAsMap.put("viplevel","");
+			}
+		}
 		return docAsMap;
 	}
 
@@ -153,7 +166,7 @@ public class SupplierIndexer implements Indexer {
 			throws Exception {
 
 	}
-	
+
 	public Set<String> findAssetLevel(Long memberId) throws Exception {
 		Object lastId = null;
 		JdbcTemplate template = DataSourceManager.getJdbcTemplate();
@@ -184,7 +197,7 @@ public class SupplierIndexer implements Indexer {
 		}
 		return keys;
 	}
-	
+
 	public Set<String> findCategory(Long memberId) throws Exception {
 		Object lastId = null;
 		JdbcTemplate template = DataSourceManager.getJdbcTemplate();

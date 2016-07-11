@@ -79,16 +79,17 @@ public class SearchServlet extends HttpServlet {
 			throw new ArgumentApiException(KEY_SIGN);
 		}
 		String api = kv.get(KEY_API);
-		if (api.equals("search")) {
-			return search(request);
-		} else if (api.equals("document_add")) {
-			return saveDocument(request, false);
-		} else if (api.equals("document_update")) {
-			return saveDocument(request, true);
-		} else if (api.equals("document_remove")) {
-			return removeDocument(request);
-		} else {
-			throw new ArgumentApiException(KEY_API);
+		switch (api) {
+			case "search":
+				return search(request);
+			case "document_add":
+				return saveDocument(request, false);
+			case "document_update":
+				return saveDocument(request, true);
+			case "document_remove":
+				return removeDocument(request);
+			default:
+				throw new ArgumentApiException(KEY_API);
 		}
 	}
 

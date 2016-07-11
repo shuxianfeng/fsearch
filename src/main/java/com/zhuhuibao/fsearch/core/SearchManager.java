@@ -16,7 +16,7 @@ import com.zhuhuibao.fsearch.L;
 import com.zhuhuibao.fsearch.exception.ApiException;
 
 public class SearchManager {
-	private static final Map<String, Searcher> SEARCHERS = new HashMap<String, Searcher>(
+	private static final Map<String, Searcher> SEARCHERS = new HashMap<>(
 			0);
 	static {
 		try {
@@ -113,18 +113,20 @@ public class SearchManager {
 
 	private static int getTypeAsInt(String s) throws Exception {
 		s = s.toLowerCase();
-		if (s.equals("str") || s.equals("string")) {
-			return SearchFieldType.TYPE_STRING;
-		} else if (s.equals("int")) {
-			return SearchFieldType.TYPE_INT;
-		} else if (s.equals("long")) {
-			return SearchFieldType.TYPE_LONG;
-		} else if (s.equals("float")) {
-			return SearchFieldType.TYPE_FLOAT;
-		} else if (s.equals("double")) {
-			return SearchFieldType.TYPE_DOUBLE;
-		} else {
-			throw new IllegalArgumentException("type: " + s);
+		switch (s) {
+			case "str":
+			case "string":
+				return SearchFieldType.TYPE_STRING;
+			case "int":
+				return SearchFieldType.TYPE_INT;
+			case "long":
+				return SearchFieldType.TYPE_LONG;
+			case "float":
+				return SearchFieldType.TYPE_FLOAT;
+			case "double":
+				return SearchFieldType.TYPE_DOUBLE;
+			default:
+				throw new IllegalArgumentException("type: " + s);
 		}
 	}
 
