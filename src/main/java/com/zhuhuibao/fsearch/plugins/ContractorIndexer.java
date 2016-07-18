@@ -107,7 +107,10 @@ public class ContractorIndexer implements Indexer {
                     Document document = searcher.parseDocument(doc);
                     //资质等级
                    for(Map.Entry<String,Object> entry : doc.entrySet()){
+
                        String key = entry.getKey();
+                       System.out.println(key);
+
                        Field field = (Field) document.getField(key);
                        if(key.contains(ASSETLEVEL_MAP.get("A")) || key.contains(ASSETLEVEL_MAP.get("ONE"))){
                            field.setBoost(3);
