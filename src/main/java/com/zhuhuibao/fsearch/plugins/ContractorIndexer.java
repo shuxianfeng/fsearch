@@ -44,18 +44,18 @@ import com.zhuhuibao.fsearch.core.SearcherOptions;
 
 public class ContractorIndexer implements Indexer {
 
-    private static final Map<String,String>    ASSETLEVEL_MAP =  new HashMap<>();
+    private static final Map<String, String> ASSETLEVEL_MAP = new HashMap<>();
 
     @Override
     public void init(SearcherOptions options, PropertiesConfig config)
             throws Exception {
         //资质等级：1：一级；2：二级；3：三级；4：甲级；5：乙级
-        ASSETLEVEL_MAP.put("A","特级");
-        ASSETLEVEL_MAP.put("B","甲级");
-        ASSETLEVEL_MAP.put("C","乙级");
-        ASSETLEVEL_MAP.put("ONE","一级");
-        ASSETLEVEL_MAP.put("TWO","二级");
-        ASSETLEVEL_MAP.put("THREE","三级");
+        ASSETLEVEL_MAP.put("A", "特级");
+        ASSETLEVEL_MAP.put("B", "甲级");
+        ASSETLEVEL_MAP.put("C", "乙级");
+        ASSETLEVEL_MAP.put("ONE", "一级");
+        ASSETLEVEL_MAP.put("TWO", "二级");
+        ASSETLEVEL_MAP.put("THREE", "三级");
     }
 
     @Override
@@ -103,25 +103,26 @@ public class ContractorIndexer implements Indexer {
                                     + StringUtil.join(assetlevels, ","));
                         }
                     }
-                    Map<String, Object> doc =  parseRawDocument(docAsMap);
+                    Map<String, Object> doc = parseRawDocument(docAsMap);
                     Document document = searcher.parseDocument(doc);
                     //资质等级
-                   for(Map.Entry<String,Object> entry : doc.entrySet()){
+                    for (Map.Entry<String, Object> entry : doc.entrySet()) {
 
-                       String key = entry.getKey();
-                      L.error(key);
-
-                       Field field = (Field) document.getField(key);
-                       if(key.contains(ASSETLEVEL_MAP.get("A")) || key.contains(ASSETLEVEL_MAP.get("ONE"))){
-                           field.setBoost(3);
-                       }
-                       if(key.contains(ASSETLEVEL_MAP.get("B")) || key.contains(ASSETLEVEL_MAP.get("TWO"))){
-                           field.setBoost(2);
-                       }
-                       if(key.contains(ASSETLEVEL_MAP.get("C")) || key.contains(ASSETLEVEL_MAP.get("THREE"))){
-                           field.setBoost(1);
-                       }
-                   }
+                        String key = entry.getKey();
+//                        L.error(key);
+                        if (StringUtil.isNotEmpty(key)) {
+                            Field field = (Field) document.getField(key);
+                            if (key.contains(ASSETLEVEL_MAP.get("A")) || key.contains(ASSETLEVEL_MAP.get("ONE"))) {
+                                field.setBoost(3);
+                            }
+                            if (key.contains(ASSETLEVEL_MAP.get("B")) || key.contains(ASSETLEVEL_MAP.get("TWO"))) {
+                                field.setBoost(2);
+                            }
+                            if (key.contains(ASSETLEVEL_MAP.get("C")) || key.contains(ASSETLEVEL_MAP.get("THREE"))) {
+                                field.setBoost(1);
+                            }
+                        }
+                    }
 
 
                     if (L.isInfoEnabled()) {
