@@ -112,7 +112,6 @@ public class ContractorIndexer implements Indexer {
                         if (StringUtil.isNotEmpty(key)) {
                             Field field = (Field) document.getField(key);
                             if(field != null){
-                                L.error(key +":" + entry.getValue());
                                 if (key.contains(ASSETLEVEL_MAP.get("A")) || key.contains(ASSETLEVEL_MAP.get("ONE"))) {
                                     field.setBoost(3F);
                                     document.add(field);
