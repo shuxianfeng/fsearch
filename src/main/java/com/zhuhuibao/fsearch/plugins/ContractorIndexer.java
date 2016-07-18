@@ -115,12 +115,15 @@ public class ContractorIndexer implements Indexer {
 //                                L.error(ASSETLEVEL_MAP.toString());
                                 if (key.contains(ASSETLEVEL_MAP.get("A")) || key.contains(ASSETLEVEL_MAP.get("ONE"))) {
                                     field.setBoost(3L);
+                                    document.add(field);
                                 }
                                 if (key.contains(ASSETLEVEL_MAP.get("B")) || key.contains(ASSETLEVEL_MAP.get("TWO"))) {
                                     field.setBoost(2L);
+                                    document.add(field);
                                 }
                                 if (key.contains(ASSETLEVEL_MAP.get("C")) || key.contains(ASSETLEVEL_MAP.get("THREE"))) {
                                     field.setBoost(1L);
+                                    document.add(field);
                                 }
                             }
                         }
