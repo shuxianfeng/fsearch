@@ -109,7 +109,7 @@ public class ContractorIndexer implements Indexer {
                    for(Map.Entry<String,Object> entry : doc.entrySet()){
 
                        String key = entry.getKey();
-                       System.out.println(key);
+                      L.error(key);
 
                        Field field = (Field) document.getField(key);
                        if(key.contains(ASSETLEVEL_MAP.get("A")) || key.contains(ASSETLEVEL_MAP.get("ONE"))){
