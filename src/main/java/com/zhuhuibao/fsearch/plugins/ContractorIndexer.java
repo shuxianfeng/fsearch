@@ -3,6 +3,7 @@ package com.zhuhuibao.fsearch.plugins;
 import java.io.File;
 import java.nio.file.Path;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.zhuhuibao.fsearch.service.MemberService;
 import com.zhuhuibao.fsearch.service.dao.MemberDao;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
@@ -22,6 +24,7 @@ import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.queryparser.flexible.core.util.StringUtils;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
 
@@ -93,7 +96,8 @@ public class ContractorIndexer implements Indexer {
                 List<Document> documents = new ArrayList<Document>(docs.size());
                 for (Map<String, Object> docAsMap : docs) {
                     Long id = FormatUtil.parseLong(docAsMap.get("id"));
-                    Set<String> assetlevels = findAssetLevel(id);
+                    MemberService memberService = new MemberService();
+                    Set<String> assetlevels = memberService.findAssetLevel(id, "2");
                     if (CollectionUtil.isNotEmpty(assetlevels)) {
                         for (String assetlevel : assetlevels) {
                             docAsMap.put(assetlevel, assetlevel);
@@ -102,32 +106,27 @@ public class ContractorIndexer implements Indexer {
                             L.info(this.getClass() + "-----------caijl:contractor.assetlevels= "
                                     + StringUtil.join(assetlevels, ","));
                         }
+
+                        String certLevels = StringUtil.join(assetlevels,",");
+                        System.out.println(certLevels);
+                        //判断资质级别
+                        if(certLevels.contains(ASSETLEVEL_MAP.get("A")) || certLevels.contains(ASSETLEVEL_MAP.get("ONE"))){
+                            System.out.println("A | ONE");
+                            docAsMap.put("certLevel",3);
+                         }
+                        else if(certLevels.contains(ASSETLEVEL_MAP.get("B")) || certLevels.contains(ASSETLEVEL_MAP.get("TWO"))){
+                            System.out.println("B | TWO");
+                            docAsMap.put("certLevel",2);
+                        }
+                       else  if(certLevels.contains(ASSETLEVEL_MAP.get("C")) || certLevels.contains(ASSETLEVEL_MAP.get("THREE"))){
+                            System.out.println("C | THREE");
+                            docAsMap.put("certLevel",1);
+                        }
+
                     }
+
                     Map<String, Object> doc = parseRawDocument(docAsMap);
                     Document document = searcher.parseDocument(doc);
-                    //资质等级
-                    for (Map.Entry<String, Object> entry : doc.entrySet()) {
-
-                        String key = entry.getKey();
-                        if (StringUtil.isNotEmpty(key)) {
-                            Field field = (Field) document.getField(key);
-                            if(field != null){
-                                if (key.contains(ASSETLEVEL_MAP.get("A")) || key.contains(ASSETLEVEL_MAP.get("ONE"))) {
-                                    field.setBoost(3F);
-                                    document.add(field);
-                                }
-                                if (key.contains(ASSETLEVEL_MAP.get("B")) || key.contains(ASSETLEVEL_MAP.get("TWO"))) {
-                                    field.setBoost(2F);
-                                    document.add(field);
-                                }
-                                if (key.contains(ASSETLEVEL_MAP.get("C")) || key.contains(ASSETLEVEL_MAP.get("THREE"))) {
-                                    field.setBoost(1F);
-                                    document.add(field);
-                                }
-                            }
-                        }
-                    }
-
 
                     if (L.isInfoEnabled()) {
                         L.info(this.getClass() + " saving document: "
@@ -154,14 +153,9 @@ public class ContractorIndexer implements Indexer {
     @Override
     public Map<String, Object> parseRawDocument(Map<String, Object> docAsMap)
             throws Exception {
+        MemberService memberService = new MemberService();
         String registerTime = FormatUtil.parseString(docAsMap.get("registerTime"));
-        if (null != registerTime && registerTime.length() > 0) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date date = sdf.parse(registerTime);
-            registerTime = DateTools.dateToString(date, Resolution.SECOND);
-            long lregtime = Long.valueOf(registerTime);
-            docAsMap.put("registerTime1", lregtime);
-        }
+        memberService.analysTime(docAsMap, registerTime);
 
         MemberDao memberDao = new MemberDao();
         //viplevel
@@ -175,41 +169,6 @@ public class ContractorIndexer implements Indexer {
         }
 
         return docAsMap;
-    }
-
-
-    public Set<String> findAssetLevel(Long memberId) throws Exception {
-        Object lastId = null;
-        JdbcTemplate template = DataSourceManager.getJdbcTemplate();
-        int batch = 100;
-        Set<String> keys = new HashSet<String>();
-        while (true) {
-            Object[] params = null;
-            String sql = "select id,certificate_name,certificate_grade"
-                    + " from t_certificate_record"
-                    + " where type='2' and is_deleted=0 and status=1 and mem_id=?";
-            if (lastId != null) {
-                params = new Object[]{memberId, lastId};
-                sql += " and id>?";
-            } else {
-                params = new Object[]{memberId};
-            }
-            sql += " order by id asc";
-            List<Map<String, Object>> docs = template.findList(sql, params, 0,
-                    batch, MapHandler.CASESENSITIVE);
-            if (docs.isEmpty()) {
-                break;
-            }
-            lastId = docs.get(docs.size() - 1).get("id");
-            for (Map<String, Object> doc : docs) {
-                String assetLevel = FormatUtil.parseString(doc.get("certificate_name"));
-                if (doc.get("certificate_grade") != null) {
-                    assetLevel += FormatUtil.parseString(doc.get("certificate_grade"));
-                }
-                keys.add(assetLevel);
-            }
-        }
-        return keys;
     }
 
 }
