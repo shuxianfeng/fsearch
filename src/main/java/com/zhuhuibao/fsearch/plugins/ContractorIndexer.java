@@ -93,7 +93,7 @@ public class ContractorIndexer implements Indexer {
                     break;
                 }
                 lastId = docs.get(docs.size() - 1).get("id");
-                List<Document> documents = new ArrayList<Document>(docs.size());
+                List<Document> documents = new ArrayList<>(docs.size());
                 for (Map<String, Object> docAsMap : docs) {
                     Long id = FormatUtil.parseLong(docAsMap.get("id"));
                     MemberService memberService = new MemberService();
@@ -107,24 +107,11 @@ public class ContractorIndexer implements Indexer {
                                     + StringUtil.join(assetlevels, ","));
                         }
 
-                        String certLevels = StringUtil.join(assetlevels,",");
-//                        System.out.println(certLevels);
-                        //判断资质级别
-                        if(certLevels.contains(ASSETLEVEL_MAP.get("A")) || certLevels.contains(ASSETLEVEL_MAP.get("ONE"))){
-//                            System.out.println("A | ONE");
-                            docAsMap.put("certLevel",3);
-                         }
-                        else if(certLevels.contains(ASSETLEVEL_MAP.get("B")) || certLevels.contains(ASSETLEVEL_MAP.get("TWO"))){
-//                            System.out.println("B | TWO");
-                            docAsMap.put("certLevel",2);
-                        }
-                       else  if(certLevels.contains(ASSETLEVEL_MAP.get("C")) || certLevels.contains(ASSETLEVEL_MAP.get("THREE"))){
-//                            System.out.println("C | THREE");
-                            docAsMap.put("certLevel",1);
-                        }
+                        genCertLevel(docAsMap, assetlevels);
 
+                    } else {
+                        docAsMap.put("certLevel", 0);
                     }
-
                     Map<String, Object> doc = parseRawDocument(docAsMap);
                     Document document = searcher.parseDocument(doc);
 
@@ -147,6 +134,32 @@ public class ContractorIndexer implements Indexer {
             throw e;
         } finally {
             FileUtil.close(directory);
+        }
+    }
+
+    private void genCertLevel(Map<String, Object> docAsMap, Set<String> assetlevels) {
+        String certLevels = StringUtil.join(assetlevels, ",");
+        //判断资质级别
+        if (certLevels.contains(ASSETLEVEL_MAP.get("A")) || certLevels.contains(ASSETLEVEL_MAP.get("ONE"))) {
+            int certLevel = 3;
+            if (certLevels.contains(ASSETLEVEL_MAP.get("B")) || certLevels.contains(ASSETLEVEL_MAP.get("TWO"))) {
+                certLevel++;
+            }
+            if (certLevels.contains(ASSETLEVEL_MAP.get("C")) || certLevels.contains(ASSETLEVEL_MAP.get("THREE"))) {
+                certLevel++;
+            }
+            docAsMap.put("certLevel", certLevel);
+        } else if (certLevels.contains(ASSETLEVEL_MAP.get("B")) || certLevels.contains(ASSETLEVEL_MAP.get("TWO"))) {
+            int certLevel = 2;
+            if(certLevels.contains(ASSETLEVEL_MAP.get("C")) || certLevels.contains(ASSETLEVEL_MAP.get("THREE"))){
+                certLevel ++;
+            }
+            docAsMap.put("certLevel", certLevel);
+        } else if (certLevels.contains(ASSETLEVEL_MAP.get("C")) || certLevels.contains(ASSETLEVEL_MAP.get("THREE"))) {
+            int certLevel = 1;
+            docAsMap.put("certLevel", certLevel);
+        } else {
+            docAsMap.put("certLevel", 0);
         }
     }
 
