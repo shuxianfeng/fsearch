@@ -139,25 +139,21 @@ public class ContractorIndexer implements Indexer {
 
     private void genCertLevel(Map<String, Object> docAsMap, Set<String> assetlevels) {
         String certLevels = StringUtil.join(assetlevels, ",");
-        //判断资质级别
-        if (certLevels.contains(ASSETLEVEL_MAP.get("A")) || certLevels.contains(ASSETLEVEL_MAP.get("ONE"))) {
-            int certLevel = 3;
-            if (certLevels.contains(ASSETLEVEL_MAP.get("B")) || certLevels.contains(ASSETLEVEL_MAP.get("TWO"))) {
-                certLevel++;
+        int certLevel = 0;
+
+        if (StringUtil.isNotEmpty(certLevels)) {
+            for (String level : assetlevels) {
+                if (level.contains(ASSETLEVEL_MAP.get("B")) || level.contains(ASSETLEVEL_MAP.get("TWO"))) {
+                    certLevel = certLevel + 3;
+                }
+                if (level.contains(ASSETLEVEL_MAP.get("C")) || level.contains(ASSETLEVEL_MAP.get("THREE"))) {
+                    certLevel = certLevel + 2;
+                }
+                if (level.contains(ASSETLEVEL_MAP.get("C")) || level.contains(ASSETLEVEL_MAP.get("THREE"))) {
+                    certLevel = certLevel + 1;
+                }
             }
-            if (certLevels.contains(ASSETLEVEL_MAP.get("C")) || certLevels.contains(ASSETLEVEL_MAP.get("THREE"))) {
-                certLevel++;
-            }
-            docAsMap.put("certLevel", certLevel);
-        } else if (certLevels.contains(ASSETLEVEL_MAP.get("B")) || certLevels.contains(ASSETLEVEL_MAP.get("TWO"))) {
-            int certLevel = 2;
-            if(certLevels.contains(ASSETLEVEL_MAP.get("C")) || certLevels.contains(ASSETLEVEL_MAP.get("THREE"))){
-                certLevel ++;
-            }
-            docAsMap.put("certLevel", certLevel);
-        } else if (certLevels.contains(ASSETLEVEL_MAP.get("C")) || certLevels.contains(ASSETLEVEL_MAP.get("THREE"))) {
-            int certLevel = 1;
-            docAsMap.put("certLevel", certLevel);
+            docAsMap.put("certLevel",certLevel);
         } else {
             docAsMap.put("certLevel", 0);
         }
