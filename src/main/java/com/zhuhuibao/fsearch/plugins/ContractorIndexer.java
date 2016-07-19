@@ -108,18 +108,18 @@ public class ContractorIndexer implements Indexer {
                         }
 
                         String certLevels = StringUtil.join(assetlevels,",");
-                        System.out.println(certLevels);
+//                        System.out.println(certLevels);
                         //判断资质级别
                         if(certLevels.contains(ASSETLEVEL_MAP.get("A")) || certLevels.contains(ASSETLEVEL_MAP.get("ONE"))){
-                            System.out.println("A | ONE");
+//                            System.out.println("A | ONE");
                             docAsMap.put("certLevel",3);
                          }
                         else if(certLevels.contains(ASSETLEVEL_MAP.get("B")) || certLevels.contains(ASSETLEVEL_MAP.get("TWO"))){
-                            System.out.println("B | TWO");
+//                            System.out.println("B | TWO");
                             docAsMap.put("certLevel",2);
                         }
                        else  if(certLevels.contains(ASSETLEVEL_MAP.get("C")) || certLevels.contains(ASSETLEVEL_MAP.get("THREE"))){
-                            System.out.println("C | THREE");
+//                            System.out.println("C | THREE");
                             docAsMap.put("certLevel",1);
                         }
 
