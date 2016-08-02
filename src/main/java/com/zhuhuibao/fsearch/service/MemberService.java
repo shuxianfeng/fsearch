@@ -4,6 +4,7 @@ import com.petkit.base.repository.db.JdbcTemplate;
 import com.petkit.base.repository.db.MapHandler;
 import com.petkit.base.repository.db.MultiTableMapHandler;
 import com.petkit.base.utils.FormatUtil;
+import com.zhuhuibao.fsearch.L;
 import com.zhuhuibao.fsearch.core.DataSourceManager;
 import org.apache.lucene.document.DateTools;
 
@@ -18,7 +19,7 @@ import java.util.*;
 public class MemberService {
 
 
-    public  void analysTime(Map<String, Object> docAsMap, String registerTime) throws ParseException {
+    public void analysTime(Map<String, Object> docAsMap, String registerTime) throws ParseException {
         if (null != registerTime && registerTime.length() > 0) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date date = sdf.parse(registerTime);
@@ -28,6 +29,14 @@ public class MemberService {
         }
     }
 
+    /**
+     * 查询用户资质信息
+     *
+     * @param memberId 用户ID
+     * @param type     资质类型：1：供应商资质；2：工程商资质；3：个人资质
+     * @return
+     * @throws Exception
+     */
     public Set<String> findAssetLevel(Long memberId, String type) throws Exception {
         Object lastId = null;
         JdbcTemplate template = DataSourceManager.getJdbcTemplate();
@@ -39,10 +48,10 @@ public class MemberService {
                     + " from t_certificate_record"
                     + " where type= ? and is_deleted=0 and status=1 and mem_id=?";
             if (lastId != null) {
-                params = new Object[]{type,memberId, lastId};
+                params = new Object[]{type, memberId, lastId};
                 sql += " and id>?";
             } else {
-                params = new Object[]{type,memberId};
+                params = new Object[]{type, memberId};
             }
             sql += " order by id asc";
             List<Map<String, Object>> docs = template.findList(sql, params, 0,
@@ -63,6 +72,13 @@ public class MemberService {
     }
 
 
+    /**
+     * 用户产品类别信息
+     *
+     * @param memberId 用户ID
+     * @return
+     * @throws Exception
+     */
     public Set<String> findCategory(Long memberId) throws Exception {
         Object lastId = null;
         JdbcTemplate template = DataSourceManager.getJdbcTemplate();
@@ -93,4 +109,108 @@ public class MemberService {
         }
         return keys;
     }
+
+
+    /**
+     * 用户产品信息
+     *
+     * @param memberId 用户ID
+     * @return
+     * @throws Exception
+     */
+    public Set<Map<String, Object>> findProducts(Long memberId) throws Exception {
+        Object lastId = null;
+        JdbcTemplate template = DataSourceManager.getJdbcTemplate();
+        int batch = 100;
+        Set<Map<String, Object>> keys = new HashSet<>();
+        try {
+            while (true) {
+                Object[] params;
+                String sql = "select id,name from t_p_product where status=1 and createid= ?";
+                if (lastId != null) {
+                    params = new Object[]{memberId, lastId};
+                    sql += " and id>?";
+                } else {
+                    params = new Object[]{memberId};
+                }
+                sql += " order by id asc";
+                List<Map<String, Object>> list = template.findList(sql, params, 1, batch, MapHandler.CASESENSITIVE);
+                if (list.isEmpty()) {
+                    break;
+                }
+                lastId = list.get(list.size() - 1).get("id");
+                for (Map<String, Object> doc : list) {
+                    keys.add(doc);
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            L.error("[t_p_product]查询失败:" + e.getMessage());
+        }
+
+        return keys;
+    }
+
+    /**
+     * 用户成功案例
+     *
+     * @param memberId 用户ID
+     * @return
+     * @throws Exception
+     */
+    public Set<Map<String, Object>> findSuccesscase(Long memberId) throws Exception {
+        Object lastId = null;
+        JdbcTemplate template = DataSourceManager.getJdbcTemplate();
+        int batch = 100;
+        Set<Map<String, Object>> keys = new HashSet<>();
+        try {
+            while (true) {
+                Object[] params;
+                String sql = "select * from t_m_success_case where `status` = 1 and is_deleted=0 and createid=?";
+                if (lastId != null) {
+                    params = new Object[]{memberId, lastId};
+                    sql += " and id>?";
+                } else {
+                    params = new Object[]{memberId};
+                }
+                sql += " order by id asc";
+                List<Map<String, Object>> list = template.findList(sql, params, 1, batch, MapHandler.CASESENSITIVE);
+                if (list.isEmpty()) {
+                    break;
+                }
+                lastId = list.get(list.size() - 1).get("id");
+                for (Map<String, Object> doc : list) {
+                    keys.add(doc);
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            L.error("[t_m_success_case]查询失败:" + e.getMessage());
+        }
+
+        return keys;
+    }
+
+    public static void main(String[] args) throws Exception {
+        MemberService service = new MemberService();
+        Set<Map<String, Object>>  products =service.findProducts(15501L);
+        System.out.println("产品数量:"+products.size());
+        for(Map<String,Object> map : products){
+            System.out.println(map.get("name"));
+        }
+
+        Set<Map<String, Object>> cases = service.findSuccesscase(11L);
+        System.out.println("成功案例数量:"+cases.size());
+
+        Set<String>  categorys  = service.findCategory(15501L);
+        System.out.println("产品分类数量:"+categorys.size());
+
+       Set<String> levels =  service.findAssetLevel(17647L,"1");
+        System.out.println("资质数量:"+levels.size());
+    }
+
 }

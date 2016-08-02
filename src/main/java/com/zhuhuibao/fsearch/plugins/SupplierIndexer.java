@@ -13,8 +13,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.zhuhuibao.fsearch.G;
 import com.zhuhuibao.fsearch.service.MemberService;
 import com.zhuhuibao.fsearch.service.dao.MemberDao;
+import com.zhuhuibao.fsearch.util.Factor;
+import com.zhuhuibao.fsearch.util.FormulaUtil;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
@@ -42,11 +45,21 @@ import com.zhuhuibao.fsearch.core.SearcherOptions;
 
 public class SupplierIndexer implements Indexer {
 
+    private static double REGISTER_CAPITAL = 0;
+    private static double PRODUCT_NUM = 0;
+    private static double PRODUCT_CATEGORY_NUM = 0;
+    private static double SUCCASE_NUM = 0;
+    private static double LEVEL_NUM = 0;
 
     @Override
     public void init(SearcherOptions options, PropertiesConfig config)
             throws Exception {
-
+        //初始化排序规则
+        REGISTER_CAPITAL = G.getConfig().getDouble("sppplier.weight.register_capital");    //注册资本
+        PRODUCT_NUM = G.getConfig().getDouble("sppplier.weight.product_num"); //产品数量
+        PRODUCT_CATEGORY_NUM = G.getConfig().getDouble("sppplier.weight.product_category_num");      //产品分类数量
+        SUCCASE_NUM = G.getConfig().getDouble("sppplier.weight.succase_num");                //成功案例数量
+        LEVEL_NUM = G.getConfig().getDouble("sppplier.weight.level_num");              //荣誉资质数量
     }
 
     @Override
@@ -67,7 +80,7 @@ public class SupplierIndexer implements Indexer {
             while (true) {
                 Object[] params = null;
                 String sql = "select id,mobile,email,registerTime,if(status=5,'已认证','未认证') authinfo,identify,enterpriseName,province,address,enterpriseType,"
-                        + "enterpriseLogo,enterpriseDesc,saleProductDesc,employeeNumber,enterpriseWebSite,enterpriseLinkman"
+                        + "enterpriseLogo,enterpriseDesc,saleProductDesc,employeeNumber,enterpriseWebSite,enterpriseLinkman,registerCapital,currency"
                         + " from t_m_member"
                         + " where status not in (0,2) and workType=100 and enterpriseEmployeeParentId=0 and (identify like '%3%' or  identify like '%4%'  or identify like '%5%')";
                 if (lastId != null) {
@@ -81,7 +94,7 @@ public class SupplierIndexer implements Indexer {
                     break;
                 }
                 lastId = docs.get(docs.size() - 1).get("id");
-                List<Document> documents = new ArrayList<Document>(docs.size());
+                List<Document> documents = new ArrayList<>(docs.size());
                 for (Map<String, Object> docAsMap : docs) {
                     Long id = FormatUtil.parseLong(docAsMap.get("id"));
                     MemberService memberService = new MemberService();
@@ -132,8 +145,11 @@ public class SupplierIndexer implements Indexer {
     @Override
     public Map<String, Object> parseRawDocument(Map<String, Object> docAsMap)
             throws Exception {
+        MemberService memberService = new MemberService();
+        String memberId = FormatUtil.parseString(docAsMap.get("id"));
+
+        //registerTime
         {
-            MemberService memberService = new MemberService();
             String registerTime = FormatUtil.parseString(docAsMap.get("registerTime"));
             memberService.analysTime(docAsMap, registerTime);
         }
@@ -152,7 +168,6 @@ public class SupplierIndexer implements Indexer {
         //viplevel
         {
             MemberDao memberDao = new MemberDao();
-            String memberId = FormatUtil.parseString(docAsMap.get("id"));
             Map<String, Object> vipmember = memberDao.findVipMember(memberId);
             if (vipmember != null) {
                 String vipLevel = FormatUtil.parseString(vipmember.get("vip_level"));
@@ -161,6 +176,64 @@ public class SupplierIndexer implements Indexer {
                 docAsMap.put("viplevel", "");
             }
         }
+        //weightLevel
+        {
+            List<Factor> factors = new ArrayList<>();
+            Factor factor = new Factor();
+            //注册资本     registerCapital,currency
+            Double registerCapital = FormatUtil.parseDouble(docAsMap.get("registerCapital"));
+            double capital = registerCapital == null ? 0 : registerCapital;
+//            System.err.println("注册资金:" + capital);
+            String currency = FormatUtil.parseString(docAsMap.get("currency"));//货币类型：1人民币，2美元
+            if ("2".equals(currency)) {
+                capital = FormulaUtil.mul(capital, 6.6);
+            }
+            double score = FormulaUtil.div(capital, 1000, 2);
+            factor.setWeight(REGISTER_CAPITAL);
+            factor.setScore(score);
+            factors.add(factor);
+
+            Set<Map<String, Object>> products = memberService.findProducts(FormatUtil.parseLong(memberId));
+            int productsNum = products.size();
+//            System.err.println("产品数量:" + productsNum);
+            //产品数量
+            factor = new Factor();
+            factor.setWeight(PRODUCT_NUM);
+            factor.setScore(productsNum);
+            factors.add(factor);
+
+            Set<Map<String, Object>> cases = memberService.findSuccesscase(FormatUtil.parseLong(memberId));
+            int casesNum = cases.size();
+//            System.err.println("成功案例数量:" + casesNum);
+            //成功案例数量
+            factor = new Factor();
+            factor.setWeight(SUCCASE_NUM);
+            factor.setScore(casesNum);
+            factors.add(factor);
+
+            Set<String> categorys = memberService.findCategory(FormatUtil.parseLong(memberId));
+            int categorysNum = categorys.size();
+//            System.err.println("产品分类数量:" + categorysNum);
+            //产品分类数量
+            factor = new Factor();
+            factor.setWeight(PRODUCT_CATEGORY_NUM);
+            factor.setScore(categorysNum);
+            factors.add(factor);
+
+            Set<String> levels = memberService.findAssetLevel(FormatUtil.parseLong(memberId), "1");  //供应商资质
+            int levelsNum = levels.size();
+//            System.err.println("资质数量:" + levelsNum);
+            //资质数量
+            factor = new Factor();
+            factor.setWeight(LEVEL_NUM);
+            factor.setScore(levelsNum);
+            factors.add(factor);
+
+            double result = FormulaUtil.calWeight(factors);
+            docAsMap.put("weightLevel", result);
+//            System.err.println("权重值:"+result);
+        }
+
         return docAsMap;
     }
 
