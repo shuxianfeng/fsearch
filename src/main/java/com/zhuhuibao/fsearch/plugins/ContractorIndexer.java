@@ -3,62 +3,43 @@ package com.zhuhuibao.fsearch.plugins;
 import java.io.File;
 import java.nio.file.Path;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
+import com.zhuhuibao.fsearch.G;
 import com.zhuhuibao.fsearch.service.MemberService;
 import com.zhuhuibao.fsearch.service.dao.MemberDao;
-import org.apache.lucene.document.DateTools;
-import org.apache.lucene.document.DateTools.Resolution;
+import com.zhuhuibao.fsearch.util.Factor;
+import com.zhuhuibao.fsearch.util.FormulaUtil;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.queryparser.flexible.core.util.StringUtils;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
 
 import com.petkit.base.config.PropertiesConfig;
 import com.petkit.base.repository.db.JdbcTemplate;
 import com.petkit.base.repository.db.MapHandler;
-import com.petkit.base.repository.db.MultiTableMapHandler;
 import com.petkit.base.utils.CollectionUtil;
 import com.petkit.base.utils.FileUtil;
 import com.petkit.base.utils.FormatUtil;
-import com.petkit.base.utils.JSONUtil;
 import com.petkit.base.utils.StringUtil;
 import com.zhuhuibao.fsearch.L;
-import com.zhuhuibao.fsearch.analysis.TokenUtil;
 import com.zhuhuibao.fsearch.core.DataSourceManager;
 import com.zhuhuibao.fsearch.core.Indexer;
-import com.zhuhuibao.fsearch.core.SearchField;
 import com.zhuhuibao.fsearch.core.Searcher;
 import com.zhuhuibao.fsearch.core.SearcherOptions;
 
 public class ContractorIndexer implements Indexer {
 
-    private static final Map<String, String> ASSETLEVEL_MAP = new HashMap<>();
 
     @Override
     public void init(SearcherOptions options, PropertiesConfig config)
             throws Exception {
-        //资质等级：1：一级；2：二级；3：三级；4：甲级；5：乙级
-        ASSETLEVEL_MAP.put("A", "特级");
-        ASSETLEVEL_MAP.put("B", "甲级");
-        ASSETLEVEL_MAP.put("C", "乙级");
-        ASSETLEVEL_MAP.put("ONE", "一级");
-        ASSETLEVEL_MAP.put("TWO", "二级");
-        ASSETLEVEL_MAP.put("THREE", "三级");
+
     }
 
     @Override
@@ -97,21 +78,25 @@ public class ContractorIndexer implements Indexer {
                 for (Map<String, Object> docAsMap : docs) {
                     Long id = FormatUtil.parseLong(docAsMap.get("id"));
                     MemberService memberService = new MemberService();
-                    Set<String> assetlevels = memberService.findAssetLevel(id, "2");
+                    List<Map<String, Object>> assetlevels = memberService.findCertLevel(id, "2");
+                    System.err.println(id + ">>>" + assetlevels.size());
                     if (CollectionUtil.isNotEmpty(assetlevels)) {
-                        for (String assetlevel : assetlevels) {
+                        for (Map<String, Object> map : assetlevels) {
+                            String assetlevel = FormatUtil.parseString(map.get("certificate_name"));
+                            if (map.get("certificate_grade") != null) {
+                                assetlevel += FormatUtil.parseString(map.get("certificate_grade"));
+                            }
                             docAsMap.put(assetlevel, assetlevel);
                         }
                         if (L.isInfoEnabled()) {
-                            L.info(this.getClass() + "-----------caijl:contractor.assetlevels= "
-                                    + StringUtil.join(assetlevels, ","));
+                            L.info(this.getClass() + "-----------caijl:contractor.assetlevels= " + StringUtil.join(assetlevels, ","));
                         }
-
                         genCertLevel(docAsMap, assetlevels);
 
                     } else {
                         docAsMap.put("certLevel", 0);
                     }
+
                     Map<String, Object> doc = parseRawDocument(docAsMap);
                     Document document = searcher.parseDocument(doc);
 
@@ -137,23 +122,45 @@ public class ContractorIndexer implements Indexer {
         }
     }
 
-    private void genCertLevel(Map<String, Object> docAsMap, Set<String> assetlevels) {
-        String certLevels = StringUtil.join(assetlevels, ",");
-        int certLevel = 0;
+    /**
+     * 排序规则
+     * @param docAsMap
+     * @param assetlevels
+     */
+    private void genCertLevel(Map<String, Object> docAsMap, List<Map<String, Object>> assetlevels) {
+        double certLevel = 0;
 
-        if (StringUtil.isNotEmpty(certLevels)) {
-            for (String level : assetlevels) {
-                if (level.contains(ASSETLEVEL_MAP.get("B")) || level.contains(ASSETLEVEL_MAP.get("TWO"))) {
-                    certLevel = certLevel + 3;
+        if (CollectionUtil.isNotEmpty(assetlevels)) {
+            List<Factor> list = new ArrayList<>();
+            for (Map<String, Object> map : assetlevels) {
+                //企业资质权重=∑（资质权重×资质对应的“资质等级权重”）
+                double certWeight,gradeWeight;
+                String certName = FormatUtil.parseString(map.get("certificate_name"));
+                String grade = FormatUtil.parseString(map.get("certificate_grade"));
+                double certDefalutWeight = G.getConfig().getDouble("其他");
+                if(StringUtil.isNotEmpty(certName.trim())){
+                    certWeight = G.getConfig().getDouble(certName.trim(), certDefalutWeight);
+                }else{
+                    certWeight = certDefalutWeight;
                 }
-                if (level.contains(ASSETLEVEL_MAP.get("C")) || level.contains(ASSETLEVEL_MAP.get("THREE"))) {
-                    certLevel = certLevel + 2;
+                System.err.println("资质权重:"+certWeight);
+
+                double gradeDefaultWeight = G.getConfig().getDouble("空值");
+                if(StringUtil.isNotEmpty(grade.trim())){
+                    gradeWeight = G.getConfig().getDouble(grade.trim(), gradeDefaultWeight);
+                }else{
+                    gradeWeight = gradeDefaultWeight;
                 }
-                if (level.contains(ASSETLEVEL_MAP.get("C")) || level.contains(ASSETLEVEL_MAP.get("THREE"))) {
-                    certLevel = certLevel + 1;
-                }
+                System.err.println("资质等级权重:"+gradeWeight);
+
+                Factor factor = new Factor();
+                factor.setWeight(certWeight);
+                factor.setScore(gradeWeight);
+                list.add(factor);
             }
-            docAsMap.put("certLevel",certLevel);
+            certLevel = FormulaUtil.calWeight(list);
+            System.err.println(docAsMap.get("enterpriseName") + ">>certLever>>>" +certLevel);
+            docAsMap.put("certLevel", certLevel);
         } else {
             docAsMap.put("certLevel", 0);
         }
