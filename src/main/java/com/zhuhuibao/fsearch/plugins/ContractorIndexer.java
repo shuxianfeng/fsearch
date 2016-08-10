@@ -79,7 +79,11 @@ public class ContractorIndexer implements Indexer {
                     Long id = FormatUtil.parseLong(docAsMap.get("id"));
                     MemberService memberService = new MemberService();
                     List<Map<String, Object>> assetlevels = memberService.findCertLevel(id, "2");
-//                    L.error(id + ">>>" + assetlevels.size());
+
+//                    if (id == 140209 || id == 140217) {
+//                        L.error(id + ">>>" + assetlevels.size());
+//                    }
+
                     if (CollectionUtil.isNotEmpty(assetlevels)) {
                         for (Map<String, Object> map : assetlevels) {
                             String assetlevel = FormatUtil.parseString(map.get("certificate_name"));
@@ -116,6 +120,7 @@ public class ContractorIndexer implements Indexer {
             return path;
         } catch (Exception e) {
             FileUtil.delete(path.toFile());
+            L.error("执行异常>>>", e);
             throw e;
         } finally {
             FileUtil.close(directory);
@@ -124,34 +129,40 @@ public class ContractorIndexer implements Indexer {
 
     /**
      * 排序规则
+     *
      * @param docAsMap
      * @param assetlevels
      */
     private void genCertLevel(Map<String, Object> docAsMap, List<Map<String, Object>> assetlevels) {
-        double certLevel = 0;
+        double certLevel;
+
+//        Long id = FormatUtil.parseLong(docAsMap.get("id"));
 
         if (CollectionUtil.isNotEmpty(assetlevels)) {
             List<Factor> list = new ArrayList<>();
             for (Map<String, Object> map : assetlevels) {
                 //企业资质权重=∑（资质权重×资质对应的“资质等级权重”）
-                double certWeight,gradeWeight;
+                double certWeight, gradeWeight;
                 String certName = FormatUtil.parseString(map.get("certificate_name"));
                 String grade = FormatUtil.parseString(map.get("certificate_grade"));
                 double certDefalutWeight = G.getConfig().getDouble("其他");
-                if(StringUtil.isNotEmpty(certName.trim())){
+                if (StringUtil.isNotEmpty(certName.trim())) {
                     certWeight = G.getConfig().getDouble(certName.trim(), certDefalutWeight);
-                }else{
+                } else {
                     certWeight = certDefalutWeight;
                 }
-//                L.error("资质权重:"+certWeight);
+
 
                 double gradeDefaultWeight = G.getConfig().getDouble("空值");
-                if(StringUtil.isNotEmpty(grade.trim())){
+                if (StringUtil.isNotEmpty(grade.trim())) {
                     gradeWeight = G.getConfig().getDouble(grade.trim(), gradeDefaultWeight);
-                }else{
+                } else {
                     gradeWeight = gradeDefaultWeight;
                 }
-//                L.error("资质等级权重:"+gradeWeight);
+
+//                if (id == 140209 || id == 140217) {
+//                    L.error("[" + certName + "]:" + certWeight + " * " + "[" + grade + "]:" + gradeWeight);
+//                }
 
                 Factor factor = new Factor();
                 factor.setWeight(certWeight);
@@ -159,7 +170,11 @@ public class ContractorIndexer implements Indexer {
                 list.add(factor);
             }
             certLevel = FormulaUtil.calWeight(list);
-//            L.error(docAsMap.get("enterpriseName") + ">>certLever>>>" +certLevel);
+
+//            if (id == 140209 || id == 140217) {
+//                L.error("\t>>>{" + docAsMap.get("enterpriseName") + "}权重值:\t" + certLevel);
+//            }
+
             docAsMap.put("certLevel", certLevel);
         } else {
             docAsMap.put("certLevel", 0);

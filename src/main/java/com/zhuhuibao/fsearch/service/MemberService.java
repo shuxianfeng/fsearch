@@ -184,8 +184,8 @@ public class MemberService {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
             L.error("[t_p_product]查询失败:" + e.getMessage());
+            throw e;
         }
 
         return keys;
@@ -226,8 +226,8 @@ public class MemberService {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
             L.error("[t_m_success_case]查询失败:" + e.getMessage());
+            throw e;
         }
 
         return keys;

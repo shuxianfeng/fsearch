@@ -37,7 +37,7 @@ public class MemberDao {
 
         } catch (Exception e) {
             e.printStackTrace();
-            L.error("[t_vip_member_info]查询失败:" + e.getMessage());
+            L.error("[t_vip_member_info]查询失败:" + e);
         }
         return vipMap;
     }

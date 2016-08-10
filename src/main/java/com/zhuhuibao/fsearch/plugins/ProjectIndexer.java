@@ -3,10 +3,8 @@ package com.zhuhuibao.fsearch.plugins;
 import com.petkit.base.config.PropertiesConfig;
 import com.petkit.base.repository.db.JdbcTemplate;
 import com.petkit.base.repository.db.MapHandler;
-import com.petkit.base.repository.db.StringPropertyHandler;
 import com.petkit.base.utils.FileUtil;
 import com.petkit.base.utils.FormatUtil;
-import com.petkit.base.utils.StringUtil;
 import com.zhuhuibao.fsearch.L;
 import com.zhuhuibao.fsearch.core.DataSourceManager;
 import com.zhuhuibao.fsearch.core.Indexer;
@@ -97,6 +95,7 @@ public class ProjectIndexer implements Indexer {
             return path;
         } catch (Exception e) {
             FileUtil.delete(path.toFile());
+            L.error("执行异常>>>",e);
             throw e;
         } finally {
             FileUtil.close(directory);
