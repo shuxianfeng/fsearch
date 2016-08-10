@@ -59,7 +59,7 @@ public class ContractorIndexer implements Indexer {
             int total = 0;
             while (true) {
                 Object[] params = null;
-                String sql = "select id,mobile,email,registerTime,if(status=5,'已认证','未认证') authinfo,enterpriseName,province,address,enterpriseType,"
+                String sql = "select id,mobile,email,registerTime,if(status=10,'已认证','未认证') authinfo,enterpriseName,province,address,enterpriseType,"
                         + "enterpriseLogo,enterpriseDesc,saleProductDesc,employeeNumber,enterpriseWebSite,enterpriseLinkman"
                         + " from t_m_member"
                         + " where status not in (0,2) and workType=100 and enterpriseEmployeeParentId=0 and identify like '%6%'";
