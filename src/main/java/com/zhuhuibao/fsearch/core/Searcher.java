@@ -381,6 +381,7 @@ public class Searcher {
     }
 
     public Document parseDocument(Map<String, Object> docAsMap) {
+        boolean test=false;
         Document doc = new Document();
         // StringBuilder generalTokenized = options.getGeneralSearchField() ==
         // null ? null
@@ -474,6 +475,9 @@ public class Searcher {
             if (StringUtil.isNotEmpty(strValue)) {
                 if (generalSearch && tokens != null) {
                     // generalTokenized.append(key).append(":");
+                    if(strValue.equals("南京东大智能化系统有限公司")){
+                        test = true;
+                    }
                     seg(strValue, tokenSet, tokens);
                 }
                 if (!group) {
@@ -500,6 +504,9 @@ public class Searcher {
 
         if (CollectionUtil.isNotEmpty(tokens)) {
             String searchString = StringUtil.join(tokens, TOKEN);
+            if(test){
+                L.error(searchString);
+            }
             FieldType fType = new FieldType();
             fType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
             fType.setStored(false);

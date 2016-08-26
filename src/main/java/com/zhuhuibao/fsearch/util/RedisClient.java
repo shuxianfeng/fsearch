@@ -1,16 +1,12 @@
 package com.zhuhuibao.fsearch.util;
 
-import com.mchange.v2.ser.SerializableUtils;
 import com.zhuhuibao.fsearch.G;
 import com.zhuhuibao.fsearch.L;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-import java.io.Serializable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author jianglz
@@ -79,16 +75,14 @@ public class RedisClient {
         }
     }
 
-    public Set list() {
+    public Set<String> keys(String keyword) {
         Set result = null;
         Jedis jedis = null;
         try {
             jedis = getJedis();
             if (jedis != null) {
-                result = jedis.keys("*");
-                for (Object obj1 : result) {
-                    System.out.println(obj1);
-                }
+                result = jedis.keys(keyword);
+
             } else {
                 return null;
             }
@@ -112,11 +106,14 @@ public class RedisClient {
             jedis = getJedis();
 
             if (jedis != null) {
-                String type = jedis.type(key);
-                System.out.println(type);
-                if(jedis.exists(key)){
-                    byte[] bytes = jedis.get(key).getBytes();
-                    System.out.println(SerializationUtil.deserialize(bytes));
+
+                if (jedis.exists(key)) {
+
+                    byte[] bytes = jedis.get(key.getBytes());
+                    result = SerializationUtil.deserialize(bytes);
+
+                } else{
+                    L.error("key is not exist");
                 }
 
             }
@@ -132,10 +129,111 @@ public class RedisClient {
         return result;
     }
 
+    public void set(String key, Object value) {
+        Jedis jedis = null;
+        try {
+            jedis = getJedis();
+
+            if (jedis != null) {
+
+                jedis.set(key.getBytes(), SerializationUtil.serialize(value));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            L.error("redis get error:>>>", e);
+        } finally {
+            if (jedis != null) {
+                release(jedis);
+            }
+        }
+    }
+
+    public void del(String key) {
+        Jedis jedis = null;
+        try {
+            jedis = getJedis();
+
+            if (jedis != null) {
+
+                jedis.del(key);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            L.error("redis get error:>>>", e);
+        } finally {
+            if (jedis != null) {
+                release(jedis);
+            }
+        }
+    }
+
+    /**
+     * flushdb删除当前选择数据库中的所有key
+     */
+    public static boolean clearDB() {
+        Jedis jedis = null;
+        try {
+            jedis = getJedis();
+
+            if (jedis != null) {
+
+                jedis.flushDB();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            L.error("redis flush all error:>>>", e);
+            return false;
+        } finally {
+            if (jedis != null) {
+                release(jedis);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 删除所有数据库中的所有key
+     */
+    public static boolean clearAll() {
+        Jedis jedis = null;
+        try {
+            jedis = getJedis();
+
+            if (jedis != null) {
+
+                jedis.flushAll();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            L.error("redis flush all error:>>>", e);
+            return false;
+        } finally {
+            if (jedis != null) {
+                release(jedis);
+            }
+        }
+        return true;
+    }
+
+
+    //test
     public static void main(String[] args) {
         RedisClient client = new RedisClient();
-        client.list();
+        Set<String> keys = client.keys("map_*");
+        System.out.println(keys);
 
-        client.get("map_130300");
+//        client.set("AAAA", "你大爷还是你大爷");
+
+//        Object value = client.get("AAAA");
+//        System.out.println(value.toString());
+
+//        client.del("AAAA");
+//        System.out.println(client.get("AAAA"));
+
+
     }
 }
