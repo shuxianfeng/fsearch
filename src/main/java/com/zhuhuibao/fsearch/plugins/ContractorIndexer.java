@@ -81,7 +81,7 @@ public class ContractorIndexer implements Indexer {
                 String sql = "select id,mobile,email,registerTime,if(status=5,'已认证','未认证') authinfo,enterpriseName,province,address,enterpriseType,"
                         + "enterpriseLogo,enterpriseDesc,saleProductDesc,employeeNumber,enterpriseWebSite,enterpriseLinkman"
                         + " from t_m_member"
-                        + " where status not in (0,2) and workType=100 and enterpriseEmployeeParentId=0 and identify like '%6%'";
+                        + " where status not in (0,2) and workType=100 and enterpriseEmployeeParentId=0 and identify like '%6%' AND id BETWEEN 142280 AND 142580";
                 if (lastId != null) {
                     params = new Object[]{lastId};
                     sql += " and id>?";

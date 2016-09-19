@@ -137,6 +137,8 @@ public class SearchServlet extends HttpServlet {
 		Searcher searcher = SearchManager.getSearcher(table);
 		Query query = QueryUtil.parseQuery(searcher, queryAsMap);
 		SortField[] sort = QueryUtil.parseSort(sortAsList);
+		
+		L.warn("SearchServlet:search:"+queryAsMap.toString()+"===="+query.toString()+"===="+sort.toString());
 		return searcher.searchForPage(query, sort, fields, offset, limit);
 	}
 
