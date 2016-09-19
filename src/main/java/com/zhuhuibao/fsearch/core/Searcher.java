@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.zhuhuibao.fsearch.analysis.MaxWordAnalyzer;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DoubleField;
@@ -61,7 +62,7 @@ import com.zhuhuibao.fsearch.core.ProductGroup;
 import com.zhuhuibao.fsearch.core.GroupValue;
 
 public class Searcher {
-    public static final Analyzer ANALYZER = new ComplexAnalyzer();
+    public static final Analyzer ANALYZER = new MaxWordAnalyzer();
     public static final String SPLIT = ",";
     public static final String TOKEN = " ";
     // private static final Seg[] SEGS = new Seg[] { TokenUtil.getMaxWordSeg(),
@@ -381,6 +382,7 @@ public class Searcher {
     }
 
     public Document parseDocument(Map<String, Object> docAsMap) {
+        boolean test=false;
         Document doc = new Document();
         // StringBuilder generalTokenized = options.getGeneralSearchField() ==
         // null ? null

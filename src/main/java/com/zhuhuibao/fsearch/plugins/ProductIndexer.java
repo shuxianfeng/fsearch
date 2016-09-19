@@ -26,18 +26,15 @@ import org.apache.lucene.store.SimpleFSDirectory;
 
 import com.petkit.base.config.PropertiesConfig;
 import com.petkit.base.repository.db.JdbcTemplate;
-import com.petkit.base.repository.db.MapHandler;
 import com.petkit.base.repository.db.MultiTableMapHandler;
 import com.petkit.base.repository.db.StringPropertyHandler;
 import com.petkit.base.utils.FileUtil;
 import com.petkit.base.utils.FormatUtil;
-import com.petkit.base.utils.JSONUtil;
 import com.petkit.base.utils.StringUtil;
 import com.zhuhuibao.fsearch.L;
 import com.zhuhuibao.fsearch.analysis.TokenUtil;
 import com.zhuhuibao.fsearch.core.DataSourceManager;
 import com.zhuhuibao.fsearch.core.Indexer;
-import com.zhuhuibao.fsearch.core.SearchField;
 import com.zhuhuibao.fsearch.core.Searcher;
 import com.zhuhuibao.fsearch.core.SearcherOptions;
 
@@ -122,6 +119,7 @@ public class ProductIndexer implements Indexer {
 			return path;
 		} catch (Exception e) {
 			FileUtil.delete(path.toFile());
+			L.error("执行异常>>>",e);
 			throw e;
 		} finally {
 			FileUtil.close(directory);

@@ -57,17 +57,14 @@ public class TokenUtil {
 
 	public static boolean isChineseChar(char c) {
 		Character.UnicodeScript sc = Character.UnicodeScript.of(c);
-		if (sc == Character.UnicodeScript.HAN) {
-			return true;
-		}
-		return false;
+		return sc == Character.UnicodeScript.HAN;
 	}
 
 	public static List<String> tokenizeChinese(String s) {
 		if (StringUtil.isEmpty(s)) {
 			return null;
 		}
-		List<String> list = new LinkedList<String>();
+		List<String> list = new LinkedList<>();
 		int i = 0;
 		int len = s.length();
 		while (i < len) {

@@ -1,6 +1,7 @@
 package com.zhuhuibao.fsearch.service.dao;
 
 import com.mysql.jdbc.StringUtils;
+import com.petkit.base.repository.RepositoryException;
 import com.petkit.base.repository.db.JdbcTemplate;
 import com.petkit.base.repository.db.MapHandler;
 import com.petkit.base.repository.db.StringPropertyHandler;
@@ -25,11 +26,11 @@ public class ProjectDao {
      * @param category 项目分类编码
      * @return
      */
-    public String findCategoryNames(String category) {
+    public String findCategoryNames(String category) throws Exception {
 
         JdbcTemplate template = DataSourceManager.getJdbcTemplate();
 
-        String categoryName = null;
+        String categoryName;
         try {
             Object[] params;
             String sql = "select group_concat(name) as names " +
@@ -41,10 +42,10 @@ public class ProjectDao {
             categoryName = template.findOne(sql, params, StringPropertyHandler.getInstance());
 
         } catch (Exception e) {
-            e.printStackTrace();
-            L.error("[t_dictionary_constant]查询失败:" + e.getMessage());
+            L.error("[t_dictionary_constant]查询失败:" + e);
+            throw e;
         }
-        return categoryName == null ? "":categoryName;
+        return categoryName == null ? "" : categoryName;
     }
 
 
@@ -57,7 +58,7 @@ public class ProjectDao {
      * @param address  address
      * @return
      */
-    public String findAddress(String province, String cityName, String area, String address) {
+    public String findAddress(String province, String cityName, String area, String address) throws Exception {
         String provinceName = findProvinceName(province);
         if (StringUtils.isNullOrEmpty(provinceName)) {
             provinceName = "";
@@ -81,7 +82,7 @@ public class ProjectDao {
      * @param area areaCode
      * @return
      */
-    public String findAreaName(String area) {
+    public String findAreaName(String area) throws Exception {
 
         JdbcTemplate template = DataSourceManager.getJdbcTemplate();
 
@@ -101,8 +102,8 @@ public class ProjectDao {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             L.error("[t_dictionary_area]查询失败:" + e.getMessage());
+            throw e;
         }
         return FormatUtil.parseString(areaMap.get("name"));
     }
@@ -113,7 +114,7 @@ public class ProjectDao {
      * @param city cityCode
      * @return
      */
-    public String findCityName(String city) {
+    public String findCityName(String city) throws Exception {
         JdbcTemplate template = DataSourceManager.getJdbcTemplate();
 
         Map<String, Object> cityMap = new HashMap<>();
@@ -132,8 +133,8 @@ public class ProjectDao {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             L.error("[t_dictionary_city]查询失败:" + e.getMessage());
+            throw e;
         }
         return FormatUtil.parseString(cityMap.get("name"));
     }
@@ -145,10 +146,10 @@ public class ProjectDao {
      * @param province provinceCode
      * @return
      */
-    public String findProvinceName(String province) {
+    public String findProvinceName(String province) throws Exception {
         JdbcTemplate template = DataSourceManager.getJdbcTemplate();
 
-        Map<String, Object> provMap = new HashMap<>();
+        Map<String, Object> provMap;
         try {
 
             Object[] params;
@@ -165,14 +166,14 @@ public class ProjectDao {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             L.error("[t_dictionary_province]查询失败:" + e.getMessage());
+            throw e;
         }
         return FormatUtil.parseString(provMap.get("name"));
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         ProjectDao dao = new ProjectDao();
         String provName = dao.findProvinceName("1100001");
         System.out.println(provName);
