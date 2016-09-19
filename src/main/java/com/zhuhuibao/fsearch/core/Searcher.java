@@ -62,7 +62,7 @@ import com.zhuhuibao.fsearch.core.ProductGroup;
 import com.zhuhuibao.fsearch.core.GroupValue;
 
 public class Searcher {
-    public static final Analyzer ANALYZER = new MaxWordAnalyzer();
+    public static final Analyzer ANALYZER = new ComplexAnalyzer();
     public static final String SPLIT = ",";
     public static final String TOKEN = " ";
     // private static final Seg[] SEGS = new Seg[] { TokenUtil.getMaxWordSeg(),
