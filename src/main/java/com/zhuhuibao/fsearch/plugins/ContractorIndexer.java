@@ -6,8 +6,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import com.zhuhuibao.fsearch.G;
 import com.zhuhuibao.fsearch.service.MemberService;
@@ -53,19 +57,22 @@ public class ContractorIndexer implements Indexer {
         Directory directory = SimpleFSDirectory.open(path);
 
         try {
-            int batch = 300;
+            int batch = 2000;
             Object lastId = null;
             JdbcTemplate template = DataSourceManager.getJdbcTemplate();
             int total = 0;
             while (true) {
                 Object[] params = null;
-                String sql = "select id,mobile,email,registerTime,if(status=10,'已认证','未认证') authinfo,enterpriseName,province,address,enterpriseType,"
-                        + "enterpriseLogo,enterpriseDesc,saleProductDesc,employeeNumber,enterpriseWebSite,enterpriseLinkman"
-                        + " from t_m_member"
-                        + " where status not in (0,2) and workType=100 and enterpriseEmployeeParentId=0 and identify like '%6%'";
+                String sql = "select m.id as id, m.mobile as mobile, m.email as email, m.registerTime as registerTime, if(m.status=10,'已认证','未认证') authinfo,"
+                        + " m.enterpriseName as enterpriseName, m.province as province, m.address as address, m.enterpriseType as enterpriseType,"
+                        + " m.enterpriseLogo as enterpriseLogo, m.enterpriseDesc as enterpriseDesc, m.saleProductDesc as saleProductDesc, m.employeeNumber as employeeNumber,"
+                        + " m.enterpriseWebSite as enterpriseWebSite, m.enterpriseLinkman as enterpriseLinkman, v.vip_level as vip_level"
+                        + " from t_m_member as m left join t_vip_member_info as v on v.member_id=m.id"
+                        + " where m.status not in (0,2) and m.workType=100 and m.enterpriseEmployeeParentId=0 and m.identify like '%6%'"
+                        + " ";
                 if (lastId != null) {
                     params = new Object[]{lastId};
-                    sql += " and id>?";
+                    sql += " and m.id>?";
                 }
                 sql += " order by id asc";
                 List<Map<String, Object>> docs = template.findList(sql, params,
@@ -73,12 +80,16 @@ public class ContractorIndexer implements Indexer {
                 if (docs.isEmpty()) {
                     break;
                 }
-                lastId = docs.get(docs.size() - 1).get("id");
+                
+                Object nextLastId = docs.get(docs.size() - 1).get("id");
+                Map certMap = this.findCertMsap(template, lastId, nextLastId);
+                
+                lastId = nextLastId;
                 List<Document> documents = new ArrayList<>(docs.size());
                 for (Map<String, Object> docAsMap : docs) {
                     Long id = FormatUtil.parseLong(docAsMap.get("id"));
-                    MemberService memberService = new MemberService();
-                    List<Map<String, Object>> assetlevels = memberService.findCertLevel(id, "2");
+                    
+                    List<Map<String, Object>> assetlevels = (List<Map<String, Object>>) certMap.get(id.toString());
 
 //                    if (id == 140209 || id == 140217) {
 //                        L.error(id + ">>>" + assetlevels.size());
@@ -126,6 +137,39 @@ public class ContractorIndexer implements Indexer {
             FileUtil.close(directory);
         }
     }
+
+    private Map findCertMsap(JdbcTemplate template, Object lastId, Object nextLastId) throws Exception {
+        Object[] params = null;
+        String sql = "select c.id as id, c.certificate_name as certificate_name, c.certificate_grade as certificate_grade, c.mem_id as mem_id"
+                + " from t_m_member as m, t_certificate_record as c"
+                + " where m.status not in (0,2) and m.workType=100 and m.enterpriseEmployeeParentId=0 and m.identify like '%6%'"
+                + " and m.id=c.mem_id";
+        if (lastId != null) {
+            params = new Object[]{lastId, nextLastId};
+            sql += " and m.id>? and m.id<=?";
+        }
+        List<Map<String, Object>> docs = template.findList(sql, params,
+                0, Integer.MAX_VALUE, MapHandler.CASESENSITIVE);
+        
+        Map m = new HashMap();
+        for (Map doc : docs) {
+            this.addToCertMap(doc, m);
+        }
+        return m;
+    }
+
+    private void addToCertMap(Map doc, Map m) {
+        Long mem_id = FormatUtil.parseLong(doc.get("mem_id"));
+        List list = (List) m.get(mem_id.toString());
+        if (null == list) {
+            list = new ArrayList();
+            m.put(mem_id.toString(), list);
+        }
+        list.add(doc);
+    }
+    
+    
+    
 
     /**
      * 排序规则
@@ -188,17 +232,18 @@ public class ContractorIndexer implements Indexer {
         String registerTime = FormatUtil.parseString(docAsMap.get("registerTime"));
         memberService.analysTime(docAsMap, registerTime);
 
-        MemberDao memberDao = new MemberDao();
         //viplevel
-        String memberId = FormatUtil.parseString(docAsMap.get("id"));
-        Map<String, Object> vipmember = memberDao.findVipMember(memberId);
-        if (vipmember != null) {
-            String vipLevel = FormatUtil.parseString(vipmember.get("vip_level"));
-            docAsMap.put("viplevel", vipLevel);
-        } else {
-            docAsMap.put("viplevel", "");
+        Object vip = docAsMap.get("vip_level");
+        docAsMap.put("viplevel", (null != vip) ? FormatUtil.parseString(vip) : "");
+        
+        //  add viplevel to certLevel
+        double vipNum = 0;
+        if (null != vip) {
+            vipNum = Double.parseDouble(FormatUtil.parseString(vip));
         }
-
+        double certLevel = ((Number) docAsMap.get("certLevel")).doubleValue();
+        docAsMap.put("certLevel", certLevel+vipNum*100);
+        
         return docAsMap;
     }
 
