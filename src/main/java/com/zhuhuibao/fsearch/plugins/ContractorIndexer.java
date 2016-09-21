@@ -237,7 +237,7 @@ public class ContractorIndexer implements Indexer {
         docAsMap.put("viplevel", (null != vip) ? FormatUtil.parseString(vip) : "");
         
         //  add viplevel to certLevel
-        double vipNum = 0;
+        double vipNum = 100;
         if (null != vip) {
             vipNum = Double.parseDouble(FormatUtil.parseString(vip));
         }
