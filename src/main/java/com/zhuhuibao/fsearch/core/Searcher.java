@@ -40,6 +40,8 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.TopFieldCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.search.grouping.GroupingSearch;
@@ -256,8 +258,6 @@ public class Searcher {
         int maxDocs = options.getMaxDocsOfQuery();
         if (offset < 0) {
             offset = 0;
-        } else if (offset >= maxDocs) {
-            return Pagination.getEmptyInstance();
         }
         if (limit <= 0 || limit > maxDocs) {
             limit = 10;
@@ -282,15 +282,17 @@ public class Searcher {
             directory = openDirectory();
             reader = DirectoryReader.open(directory);
             searcher = new IndexSearcher(reader);
-            int total = searcher.count(query);
+            
+            TopFieldCollector results = TopFieldCollector.create(sort, offset + limit, false, false, false);
+            searcher.search(query, results);
+            ScoreDoc[] hits = results.topDocs(offset, limit).scoreDocs;
+            int total = results.getTotalHits();
             if (total <= offset) {
                 return Pagination.getEmptyInstance();
             }
-
-            ScoreDoc[] hits = searcher.search(query, offset + limit, sort,
-                    false, false).scoreDocs;
+            
             List<Map<String, Object>> items = new LinkedList<>();
-            for (int i = offset; i < hits.length; i++) {
+            for (int i = 0; i < hits.length; i++) {
                 Document doc = searcher.doc(hits[i].doc);
                 Map<String, Object> item;
                 if (fields != null) {
