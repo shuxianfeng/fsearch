@@ -198,7 +198,7 @@ public class ContractorIndexer implements Indexer {
 
 
                 double gradeDefaultWeight = G.getConfig().getDouble("空值");
-                if (StringUtil.isNotEmpty(grade.trim())) {
+                if (null !=grade && StringUtil.isNotEmpty(grade.trim())) {
                     gradeWeight = G.getConfig().getDouble(grade.trim(), gradeDefaultWeight);
                 } else {
                     gradeWeight = gradeDefaultWeight;
