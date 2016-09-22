@@ -14,93 +14,75 @@ import com.petkit.base.utils.FormatUtil;
 import com.petkit.base.utils.JSONUtil;
 import com.zhuhuibao.fsearch.L;
 import com.zhuhuibao.fsearch.exception.ApiException;
+import com.zhuhuibao.fsearch.service.ContractorService;
 
 public class SearchManager {
-	private static final Map<String, Searcher> SEARCHERS = new HashMap<>(
-			0);
+	private static final Map<String, Searcher> SEARCHERS = new HashMap<>(0);
 	static {
 		try {
-			FileUtil.listClassPathFiles(L.class, "conf/searchers",
-					new FileListHandler() {
+			FileUtil.listClassPathFiles(L.class, "conf/searchers", new FileListHandler() {
 
-						@Override
-						public void streamOpened(String fileName,
-								String fullPath, InputStream in)
-								throws Exception {
-							if (fileName.startsWith("_")) {
-								return;
+				@Override
+				public void streamOpened(String fileName, String fullPath, InputStream in) throws Exception {
+					if (fileName.startsWith("_")) {
+						return;
+					}
+					PropertiesConfig config = new PropertiesConfig(in, false);
+					Map<String, Object> map = config.getAll();
+					String fieldsAsStr = map.remove("fields").toString();
+					SearcherOptions options = BeanUtil.map2bean(map, new SearcherOptions());
+					options.setMaxDocsOfQuery(Math.min(options.getMaxDocsOfQuery(), 10000));
+					{
+						List<?> fields = JSONUtil.parseAsList(fieldsAsStr);
+						List<SearchField> fieldList = new ArrayList<SearchField>(fields.size());
+						for (Object field : fields) {
+							Map<?, ?> fieldAsMap = (Map<?, ?>) field;
+							String name = fieldAsMap.get("name").toString();
+							String typeAsStr = fieldAsMap.get("type").toString();
+							int type = getTypeAsInt(typeAsStr);
+							boolean store = FormatUtil.parseBoolean(fieldAsMap.get("store"));
+							boolean index = FormatUtil.parseBoolean(fieldAsMap.get("index"));
+							boolean tokenized = false;
+							boolean generalSearch = false;
+							if (type == SearchFieldType.TYPE_STRING) {
+								tokenized = FormatUtil.parseBoolean(fieldAsMap.get("tokenized"));
+								generalSearch = FormatUtil.parseBoolean(fieldAsMap.get("generalSearch"));
 							}
-							PropertiesConfig config = new PropertiesConfig(in,
-									false);
-							Map<String, Object> map = config.getAll();
-							String fieldsAsStr = map.remove("fields")
-									.toString();
-							SearcherOptions options = BeanUtil.map2bean(map,
-									new SearcherOptions());
-							options.setMaxDocsOfQuery(Math.min(
-									options.getMaxDocsOfQuery(), 10000));
-							{
-								List<?> fields = JSONUtil
-										.parseAsList(fieldsAsStr);
-								List<SearchField> fieldList = new ArrayList<SearchField>(
-										fields.size());
-								for (Object field : fields) {
-									Map<?, ?> fieldAsMap = (Map<?, ?>) field;
-									String name = fieldAsMap.get("name")
-											.toString();
-									String typeAsStr = fieldAsMap.get("type")
-											.toString();
-									int type = getTypeAsInt(typeAsStr);
-									boolean store = FormatUtil
-											.parseBoolean(fieldAsMap
-													.get("store"));
-									boolean index = FormatUtil
-											.parseBoolean(fieldAsMap
-													.get("index"));
-									boolean tokenized = false;
-									boolean generalSearch = false;
-									if (type == SearchFieldType.TYPE_STRING) {
-										tokenized = FormatUtil
-												.parseBoolean(fieldAsMap
-														.get("tokenized"));
-										generalSearch = FormatUtil
-												.parseBoolean(fieldAsMap
-														.get("generalSearch"));
-									}
-									boolean group = FormatUtil
-											.parseBoolean(fieldAsMap
-													.get("group"));
-									SearchField f = new SearchField();
-									f.setName(name);
-									f.setType(type);
-									f.setStore(store);
-									f.setIndex(index);
-									f.setTokenized(tokenized);
-									f.setGeneralSearch(generalSearch);
-									f.setGroup(group);
-									if (!f.isIndex() && !f.isStore()
-											&& !f.isGeneralSearch()) {
-										throw new RuntimeException(
-												"Neither store or index or generalsearch on field: "
-														+ name);
-									}
-									fieldList.add(f);
-								}
-								options.setFields(fieldList);
+							boolean group = FormatUtil.parseBoolean(fieldAsMap.get("group"));
+							SearchField f = new SearchField();
+							f.setName(name);
+							f.setType(type);
+							f.setStore(store);
+							f.setIndex(index);
+							f.setTokenized(tokenized);
+							f.setGeneralSearch(generalSearch);
+							f.setGroup(group);
+							if (!f.isIndex() && !f.isStore() && !f.isGeneralSearch()) {
+								throw new RuntimeException("Neither store or index or generalsearch on field: " + name);
 							}
-
-							SEARCHERS.put(options.getName(), new Searcher(
-									options, config));
+							fieldList.add(f);
 						}
 
-						@Override
-						public boolean willOpenStream(String fileName,
-								String fullPath, boolean isDirectory)
-								throws Exception {
-							return true;
+						// 若当前处理工程商搜索，则增加工程商资质相关字段
+						if ("contractor".equals(options.getName())) {
+							ContractorService contractorService = new ContractorService();
+							List<SearchField> certificateSearchFieldList = contractorService
+									.findContractorCertificateSearchField();
+							fieldList.addAll(certificateSearchFieldList);
 						}
 
-					});
+						options.setFields(fieldList);
+					}
+
+					SEARCHERS.put(options.getName(), new Searcher(options, config));
+				}
+
+				@Override
+				public boolean willOpenStream(String fileName, String fullPath, boolean isDirectory) throws Exception {
+					return true;
+				}
+
+			});
 		} catch (Exception e) {
 			L.error("Failed to init SearchManager", e);
 			System.exit(-1);
@@ -114,19 +96,19 @@ public class SearchManager {
 	private static int getTypeAsInt(String s) throws Exception {
 		s = s.toLowerCase();
 		switch (s) {
-			case "str":
-			case "string":
-				return SearchFieldType.TYPE_STRING;
-			case "int":
-				return SearchFieldType.TYPE_INT;
-			case "long":
-				return SearchFieldType.TYPE_LONG;
-			case "float":
-				return SearchFieldType.TYPE_FLOAT;
-			case "double":
-				return SearchFieldType.TYPE_DOUBLE;
-			default:
-				throw new IllegalArgumentException("type: " + s);
+		case "str":
+		case "string":
+			return SearchFieldType.TYPE_STRING;
+		case "int":
+			return SearchFieldType.TYPE_INT;
+		case "long":
+			return SearchFieldType.TYPE_LONG;
+		case "float":
+			return SearchFieldType.TYPE_FLOAT;
+		case "double":
+			return SearchFieldType.TYPE_DOUBLE;
+		default:
+			throw new IllegalArgumentException("type: " + s);
 		}
 	}
 

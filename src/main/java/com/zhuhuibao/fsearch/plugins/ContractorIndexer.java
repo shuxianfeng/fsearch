@@ -97,11 +97,15 @@ public class ContractorIndexer implements Indexer {
 
                     if (CollectionUtil.isNotEmpty(assetlevels)) {
                         for (Map<String, Object> map : assetlevels) {
+                        	
                             String assetlevel = FormatUtil.parseString(map.get("certificate_name"));
                             if (map.get("certificate_grade") != null) {
                                 assetlevel += FormatUtil.parseString(map.get("certificate_grade"));
+                                String certificateName = FormatUtil.parseString(map.get("certificate_name"));
+                                docAsMap.put(certificateName,certificateName);
                             }
                             docAsMap.put(assetlevel, assetlevel);
+                            
                         }
                         if (L.isInfoEnabled()) {
                             L.info(this.getClass() + "-----------caijl:contractor.assetlevels= " + StringUtil.join(assetlevels, ","));
