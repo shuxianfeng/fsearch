@@ -79,7 +79,7 @@ public class ContractorService {
 		JdbcTemplate template = DataSourceManager.getJdbcTemplate();
 
 		try {
-			String sql = "SELECT id,name,type,degree  FROM t_dictionary_certificate WHERE TYPE = '2'";
+			String sql = "SELECT id,name,type,degree  FROM t_dictionary_certificate WHERE TYPE = '2' AND searchFlag = '1' ORDER BY weight ASC";
 
 			Object[] params = new Object[] {};
 
