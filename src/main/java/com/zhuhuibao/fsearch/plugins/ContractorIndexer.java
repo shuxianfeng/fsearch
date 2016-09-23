@@ -51,7 +51,7 @@ public class ContractorIndexer implements Indexer {
 		File dir = new File(options.getPath() + "-" + dateFormat.format(new Date()));
 		boolean mkdirs = dir.mkdirs();
 		Path path = dir.toPath();
-		L.warn("ContractorIndexer::fullIndex::mkdirs=" + mkdirs + "::path=" + path.toString());
+		L.warn("ContractorIndexer::fullIndex::mkdirs=" + mkdirs + "::path=" + path.toString()+"::"+ (new Date()).getTime());
 		Directory directory = SimpleFSDirectory.open(path);
 
 		try {
