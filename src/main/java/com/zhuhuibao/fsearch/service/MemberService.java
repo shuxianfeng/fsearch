@@ -139,7 +139,7 @@ public class MemberService {
             lastId = docs.get(docs.size() - 1).get("t_p_category.id");
             for (Map<String, Object> doc : docs) {
                 String categoryName = FormatUtil.parseString(doc.get("t_p_category.name"));
-                String parentCategoryName = FormatUtil.parseString(doc.get("t_p_category.pname"));
+                String parentCategoryName = FormatUtil.parseString(doc.get(".pname"));
                 keys.add(categoryName);
                 keys.add(parentCategoryName);
             }
