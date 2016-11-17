@@ -156,6 +156,11 @@ public class Searcher {
         }
     }
 
+    /**
+     * 通过FSDirectory类加载一个文件目录
+     * @return
+     * @throws Exception
+     */
     public Directory openDirectory() throws Exception {
         if (path == null) {
             throw new RuntimeException("No path set");
@@ -215,6 +220,7 @@ public class Searcher {
         }
         IndexWriter writer = null;
         try {
+        	//通过IndexWriter对象来创建索引
             writer = new IndexWriter(directory, indexConfig);
             writer.addDocuments(docs);
         } finally {
@@ -231,6 +237,7 @@ public class Searcher {
         IndexWriter writer = null;
         try {
             directory = openDirectory();
+            //通过IndexWriter对象来维护索引
             writer = new IndexWriter(directory, indexConfig);
             writer.updateDocument(new Term(options.getIdField(), id), doc);
         } finally {

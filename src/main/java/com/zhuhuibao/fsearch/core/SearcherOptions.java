@@ -4,6 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 搜索选项实体类
+ * @author zhuangyuhao
+ * @time   2016年11月10日 下午8:35:02
+ *
+ */
 public class SearcherOptions {
 	private String name;
 	private String path;

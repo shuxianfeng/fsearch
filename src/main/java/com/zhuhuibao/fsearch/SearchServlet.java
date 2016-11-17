@@ -66,10 +66,12 @@ public class SearchServlet extends HttpServlet {
 			}
 			kv.put(key, value);
 		}
+		//1 获取账户的秘钥
 		String secret = AccountManager.findSecret(kv.get(KEY_KEY));
 		if (secret == null) {
 			throw new ArgumentApiException(KEY_KEY);
 		}
+		//2 重新生成签名
 		String sign = kv.remove(KEY_SIGN);
 		if (sign == null) {
 			throw new ArgumentApiException(KEY_SIGN);
@@ -78,6 +80,7 @@ public class SearchServlet extends HttpServlet {
 		if (!ok) {
 			throw new ArgumentApiException(KEY_SIGN);
 		}
+		//
 		String api = kv.get(KEY_API);
 		switch (api) {
 			case "search":

@@ -9,7 +9,13 @@ import java.util.Set;
 import com.petkit.base.utils.EncryptUtil;
 
 public class SignUtil {
-
+	
+	/**
+	 * 生成签名
+	 * @param kv
+	 * @param secret
+	 * @return
+	 */
 	public static String makeSign(Map<?, ?> kv, String secret) {
 		Set<?> keySet = kv.keySet();
 		List<String> keys = new ArrayList<String>(keySet.size());
@@ -33,6 +39,7 @@ public class SignUtil {
 		}
 		String realSign;
 		try {
+			//md5加密
 			realSign = EncryptUtil.md5(encodeString);
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to encode sign", e);
