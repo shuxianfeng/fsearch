@@ -18,7 +18,6 @@ import java.util.*;
  */
 public class MemberService {
 
-
     public void analysTime(Map<String, Object> docAsMap, String registerTime) throws ParseException {
         if (null != registerTime && registerTime.length() > 0) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -32,8 +31,10 @@ public class MemberService {
     /**
      * 查询用户资质信息
      *
-     * @param memberId 用户ID
-     * @param type     资质类型：1：供应商资质；2：工程商资质；3：个人资质
+     * @param memberId
+     *            用户ID
+     * @param type
+     *            资质类型：1：供应商资质；2：工程商资质；3：个人资质
      * @return
      * @throws Exception
      */
@@ -44,18 +45,15 @@ public class MemberService {
         Set<String> keys = new HashSet<>();
         while (true) {
             Object[] params;
-            String sql = "select id,certificate_name,certificate_grade"
-                    + " from t_certificate_record"
-                    + " where type= ? and is_deleted=0 and status=1 and mem_id=?";
+            String sql = "select id,certificate_name,certificate_grade" + " from t_certificate_record" + " where type= ? and is_deleted=0 and status=1 and mem_id=?";
             if (lastId != null) {
-                params = new Object[]{type, memberId, lastId};
+                params = new Object[] { type, memberId, lastId };
                 sql += " and id>?";
             } else {
-                params = new Object[]{type, memberId};
+                params = new Object[] { type, memberId };
             }
             sql += " order by id asc";
-            List<Map<String, Object>> docs = template.findList(sql, params, 0,
-                    batch, MapHandler.CASESENSITIVE);
+            List<Map<String, Object>> docs = template.findList(sql, params, 0, batch, MapHandler.CASESENSITIVE);
             if (docs.isEmpty()) {
                 break;
             }
@@ -74,8 +72,10 @@ public class MemberService {
     /**
      * 查询用户资质信息
      *
-     * @param memberId 用户ID
-     * @param type     资质类型：1：供应商资质；2：工程商资质；3：个人资质
+     * @param memberId
+     *            用户ID
+     * @param type
+     *            资质类型：1：供应商资质；2：工程商资质；3：个人资质
      * @return
      * @throws Exception
      */
@@ -87,14 +87,12 @@ public class MemberService {
         int batch = 100;
         while (true) {
             Object[] params;
-            String sql = "select id,certificate_name,certificate_grade"
-                    + " from t_certificate_record"
-                    + " where type= ? and is_deleted=0 and status=1 and mem_id=?";
+            String sql = "select id,certificate_name,certificate_grade" + " from t_certificate_record" + " where type= ? and is_deleted=0 and status=1 and mem_id=?";
             if (lastId != null) {
-                params = new Object[]{type, memberId, lastId};
+                params = new Object[] { type, memberId, lastId };
                 sql += " and id>?";
             } else {
-                params = new Object[]{type, memberId};
+                params = new Object[] { type, memberId };
             }
             sql += " order by id asc";
             List<Map<String, Object>> docs = template.findList(sql, params, 0, batch, MapHandler.CASESENSITIVE);
@@ -109,11 +107,11 @@ public class MemberService {
         return items;
     }
 
-
     /**
      * 用户产品类别信息
      *
-     * @param memberId 用户ID
+     * @param memberId
+     *            用户ID
      * @return
      * @throws Exception
      */
@@ -124,35 +122,36 @@ public class MemberService {
         Set<String> keys = new HashSet<>();
         while (true) {
             Object[] params;
-            String sql = "select c.id,c.name"
+            String sql = "select c.id,c.name,(SELECT NAME FROM t_p_category a WHERE a.id = c.`parentId` ) AS pname "
                     + " from t_p_category c,(select distinct scateid from t_p_product where status=1 and createid=?) p"
                     + " where c.id=p.scateid";
             if (lastId != null) {
-                params = new Object[]{memberId, lastId};
+                params = new Object[] { memberId, lastId };
                 sql += " and c.id>?";
             } else {
-                params = new Object[]{memberId};
+                params = new Object[] { memberId };
             }
             sql += " order by c.id asc";
-            List<Map<String, Object>> docs = template.findList(sql, params, 0,
-                    batch, MultiTableMapHandler.CASESENSITIVE);
+            List<Map<String, Object>> docs = template.findList(sql, params, 0, batch, MultiTableMapHandler.CASESENSITIVE);
             if (docs.isEmpty()) {
                 break;
             }
             lastId = docs.get(docs.size() - 1).get("t_p_category.id");
             for (Map<String, Object> doc : docs) {
                 String categoryName = FormatUtil.parseString(doc.get("t_p_category.name"));
+                String parentCategoryName = FormatUtil.parseString(doc.get(".pname"));
                 keys.add(categoryName);
+                keys.add(parentCategoryName);
             }
         }
         return keys;
     }
 
-
     /**
      * 用户产品信息
      *
-     * @param memberId 用户ID
+     * @param memberId
+     *            用户ID
      * @return
      * @throws Exception
      */
@@ -166,10 +165,10 @@ public class MemberService {
                 Object[] params;
                 String sql = "select id,name from t_p_product where status=1 and createid= ?";
                 if (lastId != null) {
-                    params = new Object[]{memberId, lastId};
+                    params = new Object[] { memberId, lastId };
                     sql += " and id>?";
                 } else {
-                    params = new Object[]{memberId};
+                    params = new Object[] { memberId };
                 }
                 sql += " order by id asc";
                 List<Map<String, Object>> list = template.findList(sql, params, 1, batch, MapHandler.CASESENSITIVE);
@@ -182,7 +181,6 @@ public class MemberService {
                 }
             }
 
-
         } catch (Exception e) {
             L.error("[t_p_product]查询失败:" + e.getMessage());
             throw e;
@@ -194,7 +192,8 @@ public class MemberService {
     /**
      * 用户成功案例
      *
-     * @param memberId 用户ID
+     * @param memberId
+     *            用户ID
      * @return
      * @throws Exception
      */
@@ -208,10 +207,10 @@ public class MemberService {
                 Object[] params;
                 String sql = "select * from t_m_success_case where `status` = 1 and is_deleted=0 and createid=?";
                 if (lastId != null) {
-                    params = new Object[]{memberId, lastId};
+                    params = new Object[] { memberId, lastId };
                     sql += " and id>?";
                 } else {
-                    params = new Object[]{memberId};
+                    params = new Object[] { memberId };
                 }
                 sql += " order by id asc";
                 List<Map<String, Object>> list = template.findList(sql, params, 1, batch, MapHandler.CASESENSITIVE);
@@ -223,7 +222,6 @@ public class MemberService {
                     keys.add(doc);
                 }
             }
-
 
         } catch (Exception e) {
             L.error("[t_m_success_case]查询失败:" + e.getMessage());

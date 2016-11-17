@@ -62,7 +62,7 @@ public class ContractorIndexer implements Indexer {
 			while (true) {
 				Object[] params = null;
 				String sql = "select m.id as id, m.mobile as mobile, m.email as email, m.registerTime as registerTime, if(m.status=10,'已认证','未认证') authinfo,"
-						+ " m.enterpriseName as enterpriseName, m.province as province, m.address as address, m.enterpriseType as enterpriseType,"
+						+ " m.enterpriseName as enterpriseName, m.province as province,m.city AS city, m.address as address, m.enterpriseType as enterpriseType,"
 						+ " m.enterpriseLogo as enterpriseLogo, m.enterpriseDesc as enterpriseDesc, m.saleProductDesc as saleProductDesc, m.employeeNumber as employeeNumber,"
 						+ " m.enterpriseWebSite as enterpriseWebSite, m.enterpriseLinkman as enterpriseLinkman, v.vip_level as vip_level"
 						+ " from t_m_member as m left join t_vip_member_info as v on v.member_id=m.id"
