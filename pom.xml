@@ -1,16 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.zhuhuibao</groupId>
+    <groupId>com.movision</groupId>
     <artifactId>fsearch</artifactId>
     <version>0.1</version>
-    <name>${project.artifactId}</name>
+    <name>fsearch</name>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
 
     <dependencies>
 
@@ -46,11 +45,13 @@
 
 
         <!-- others -->
+        <!--包括了常用的文档，索引，搜索，存储等相关核心代码-->
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
             <version>5.1.0</version>
         </dependency>
+        <!--提供了搜索相关的代码，用于各种搜索，比如模糊搜索，范围搜索，等等-->
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-queryparser</artifactId>
@@ -187,7 +188,7 @@
         <repository>
             <id>releases</id>
             <name>releases</name>
-            <url>http://139.196.189.100:8081/nexus/content/repositories/releases</url>
+            <url>http://120.77.214.187:8081/nexus/content/repositories/releases</url>
         </repository>
     </repositories>
 </project>
