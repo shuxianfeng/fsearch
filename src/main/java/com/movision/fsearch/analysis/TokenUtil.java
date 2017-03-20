@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import com.chenlb.mmseg4j.ComplexSeg;
 import com.chenlb.mmseg4j.Dictionary;
@@ -15,7 +16,8 @@ import com.petkit.base.utils.StringUtil;
 import com.movision.fsearch.G;
 
 public class TokenUtil {
-	private static File DICT_FILE = null;
+    //词库文件
+    private static File DICT_FILE = null;
 	private static Dictionary DICT = null;
 //	private static Seg COMPLEX_SEG = null;
 //	private static Seg MAXWORD_SEG = null;
@@ -55,7 +57,13 @@ public class TokenUtil {
 		DICT.reload();
 	}
 
-	public static boolean isChineseChar(char c) {
+    /**
+     * 判断是否是中文字符
+     *
+     * @param c
+     * @return
+     */
+    public static boolean isChineseChar(char c) {
 		Character.UnicodeScript sc = Character.UnicodeScript.of(c);
 		return sc == Character.UnicodeScript.HAN;
 	}
@@ -92,7 +100,28 @@ public class TokenUtil {
 				}
 			}
 			list.add(buf.toString());
+        }
+        return list;
+    }
+
+    /**
+     * 校验中文字符，只添加中文字符
+     *
+     * @param items
+     * @param set
+     */
+    public static void validateChineseCharAndAddToSet(List<String> items, Set<String> set) {
+        for (String item : items) {
+            List<String> tokens = TokenUtil.tokenizeChinese(item);
+            if (tokens == null) {
+                continue;
+            }
+            //中文字符校验，只添加中文字符
+            for (String token : tokens) {
+                if (TokenUtil.isChineseChar(token.charAt(0))) {
+                    set.add(token);
+                }
+			}
 		}
-		return list;
 	}
 }

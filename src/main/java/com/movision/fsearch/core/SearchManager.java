@@ -27,6 +27,14 @@ public class SearchManager {
         try {
             FileUtil.listClassPathFiles(L.class, "conf/searchers", new FileListHandler() {
 
+                /**
+                 * 封装Searcher中的 SearcherOptions 和 PropertiesConfig
+                 *
+                 * @param fileName
+                 * @param fullPath
+                 * @param in
+                 * @throws Exception
+                 */
                 @Override
                 public void streamOpened(String fileName, String fullPath, InputStream in) throws Exception {
                     if (fileName.startsWith("_")) {
@@ -39,6 +47,9 @@ public class SearchManager {
                     //封装SearcherOptions
                     SearcherOptions options = BeanUtil.map2bean(map, new SearcherOptions());
                     options.setMaxDocsOfQuery(Math.min(options.getMaxDocsOfQuery(), 10000));
+                    /**
+                     *  封装SearcherOptions中的fields
+                     */
                     {
                         List<?> fields = JSONUtil.parseAsList(fieldsAsStr);
                         List<SearchField> fieldList = new ArrayList<SearchField>(fields.size());

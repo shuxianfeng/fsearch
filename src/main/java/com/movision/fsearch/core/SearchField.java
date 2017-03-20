@@ -1,12 +1,29 @@
 package com.movision.fsearch.core;
 
+/**
+ * 搜索字段
+ *
+ * @Author zhuangyuhao
+ * @Date 2017/3/20 10:14
+ */
 public class SearchField {
 	private String name;
 	private int type;
+	/**
+	 * 是否存储
+	 */
 	private boolean store;
+	/**
+	 * 是否索引
+	 */
 	private boolean index = true;
+	/**
+	 * 是否分类，如果此字段的值应由分析器分析，则为true
+	 */
 	private boolean tokenized = true;
+
 	private boolean generalSearch;
+
 	private boolean group = false;
 
 	public SearchField() {

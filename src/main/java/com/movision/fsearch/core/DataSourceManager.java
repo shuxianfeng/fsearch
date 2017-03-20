@@ -7,7 +7,11 @@ import com.petkit.base.repository.db.JdbcTemplate;
 
 public class DataSourceManager {
 	private static JdbcTemplate jdbcTemplate;
-	static {
+
+    /**
+     * 加载配置文件中的数据库参数
+     */
+    static {
 		try {
 			PropertiesConfig config = new PropertiesConfig(
 					L.class.getResourceAsStream("conf/datasource.ini"), false);

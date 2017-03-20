@@ -39,28 +39,35 @@ import com.movision.fsearch.core.Searcher;
 import com.movision.fsearch.core.SearcherOptions;
 
 public class ProductIndexer implements Indexer {
+
 	private Timer timer = null;
 
 	@Override
 	public Path fullIndex(Searcher searcher) throws Exception {
 
-		SearcherOptions options = searcher.getOptions();
+        //获取搜索选项
+        SearcherOptions options = searcher.getOptions();
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-		File dir = new File(options.getPath() + "-"
-				+ dateFormat.format(new Date()));
-		dir.mkdirs();
+        File dir = new File(options.getPath() + "-" + dateFormat.format(new Date()));
+        dir.mkdirs();
 		Path path = dir.toPath();
-		Directory directory = SimpleFSDirectory.open(path);
+        // 获取一个存储在文件系统中的索引的位置
+        Directory directory = SimpleFSDirectory.open(path);
 
 		try {
-			int batch = 300;
+            //批量查询，每次300条数据
+            int batch = 300;
 			Object lastId = null;
-			JdbcTemplate template = DataSourceManager.getJdbcTemplate();
+            //实例化JdbcTemplate
+            JdbcTemplate template = DataSourceManager.getJdbcTemplate();
 			int total = 0;
 			while (true) {
 				Object[] params = null;
-				String sql = "select p.*, m.enterpriseName member_enterpriseName, m.identify member_identify, m.province member_province, m.city member_city,b.CNName brand_CNName,c.name scate_name "
-						+ " from (select * from t_p_product where status=1) p"
+                //构建sql
+                //此处是查询商品信息，企业名称，会员身份，会员的省，市，区，商品品牌名称，商品分类名称
+                String sql = "select p.*, m.enterpriseName member_enterpriseName, m.identify member_identify, " +
+                        "m.province member_province, m.city member_city, b.CNName brand_CNName, c.name scate_name "
+                        + " from (select * from t_p_product where status=1) p"
 						+ " left outer join t_m_member m on m.id=p.createid"
 						+ " left outer join t_p_brand b on b.id=p.brandid"
 						+ " left outer join t_p_category c on c.id=p.scateid";
@@ -68,18 +75,24 @@ public class ProductIndexer implements Indexer {
 					params = new Object[] { lastId };
 					sql += " where p.id>?";
 				}
-				sql += " order by p.id asc";
-				List<Map<String, Object>> docs = template.findList(sql, params,
+                //从小到大排序
+                sql += " order by p.id asc";
+                //获取数据库查询结果
+                List<Map<String, Object>> docs = template.findList(sql, params,
 						0, batch, MultiTableMapHandler.CASESENSITIVE);
 				if (docs.isEmpty()) {
 					break;
 				}
-				lastId = docs.get(docs.size() - 1).get("t_p_product.id");
+                //获取结果中最后一条数据的id
+                lastId = docs.get(docs.size() - 1).get("t_p_product.id");
 				List<Document> documents = new ArrayList<Document>(docs.size());
-				for (Map<String, Object> docAsMap : docs) {
+                //遍历查询结果
+                for (Map<String, Object> docAsMap : docs) {
 					Map<String, Object> doc = new HashMap<String, Object>();
+
 					for (Entry<String, Object> field : docAsMap.entrySet()) {
-						String key = null;
+                        //这边生成 key=member_1 的键值对
+                        String key = null;
 						if (field.getKey().startsWith("t_m_member.")) {
 							key = "member_"
 									+ field.getKey().substring(
@@ -101,15 +114,18 @@ public class ProductIndexer implements Indexer {
 						}
 						doc.put(key, field.getValue());
 					}
+
 					Map<String, Object> parsedDoc = parseRawDocument(doc);
-					Document document = searcher.parseDocument(parsedDoc);
+                    //生成搜索结果文档
+                    Document document = searcher.parseDocument(parsedDoc);
 					if (L.isInfoEnabled()) {
 						L.info(this.getClass() + " saving document: "
 								+ document);
 					}
 					documents.add(document);
 				}
-				IndexWriter writer = new IndexWriter(directory,
+                //把搜索结果文档添加到索引中
+                IndexWriter writer = new IndexWriter(directory,
 						new IndexWriterConfig(Searcher.ANALYZER));
 				writer.addDocuments(documents);
 				writer.close();
@@ -126,14 +142,23 @@ public class ProductIndexer implements Indexer {
 		}
 	}
 
-	@Override
+    /**
+     * 解析搜索结果的一行数据，再map中封装必要参数：_p， price1， publishTime1， brandid1， scateid1
+     *
+     * @param docAsMap
+     * @return
+     * @throws Exception
+     */
+    @Override
 	public Map<String, Object> parseRawDocument(Map<String, Object> docAsMap)
-			throws Exception {
+            throws Exception {
+        //1 参数
 		String paramValues = FormatUtil.parseString(docAsMap.get("paramValues"));
 		if (null != paramValues  && !paramValues.isEmpty()){
 			paramValues.replaceAll(Searcher.SPLIT, Searcher.TOKEN);
 			docAsMap.put("_p", paramValues.toString());
 		}
+        //2 价格
 		{
 			Float price = FormatUtil.parseFloat(docAsMap.get("price"));
 			if (null == price || price.floatValue() < 0){
@@ -141,6 +166,7 @@ public class ProductIndexer implements Indexer {
 			}
 			docAsMap.put("price1", price);
 		}
+        //发布时间
 		{
 			String publishtime = FormatUtil.parseString(docAsMap.get("publishTime"));
 			if(null != publishtime && publishtime.length() > 0 ){
@@ -151,12 +177,14 @@ public class ProductIndexer implements Indexer {
 				docAsMap.put("publishTime1", lpubtime);
 			}
 		}
+        //品牌
 		{
 			Integer brandid = FormatUtil.parseInteger(docAsMap.get("brandid"));
 			if(null != brandid && brandid.intValue() > 0){
 				docAsMap.put("brandid1", brandid);
 			}
 		}
+        //分类
 		{
 			Integer scateid = FormatUtil.parseInteger(docAsMap.get("scateid"));
 			if(null != scateid && scateid.intValue() > 0){
@@ -168,7 +196,10 @@ public class ProductIndexer implements Indexer {
 
 	@Override
 	public void init(SearcherOptions options, PropertiesConfig config)
-			throws Exception {
+            throws Exception {
+        /**
+         * 延时0毫秒后重复的执行task(即更新字典)，周期是30分钟
+         */
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
 
@@ -182,8 +213,12 @@ public class ProductIndexer implements Indexer {
 			}
 
 		}, 0, config.getLong("t_p_product.updateWordsMinutes") * 60L * 1000L);
-	}
+    }
 
+    /**
+     * 更新字典（词库）
+     * @throws Exception
+     */
 	private void updateWords() throws Exception {
 		// Add to words in db
 		batchAddWords(loadBrandWords());
@@ -218,8 +253,13 @@ public class ProductIndexer implements Indexer {
 
 		// Reload
 		TokenUtil.reloadDictionary();
-	}
+    }
 
+    /**
+     *
+     * @param words
+     * @throws Exception
+     */
 	private void batchAddWords(Set<String> words) throws Exception {
 		if (words.isEmpty()) {
 			return;
@@ -229,8 +269,8 @@ public class ProductIndexer implements Indexer {
 		while (!words.isEmpty()) {
 			int i = 0;
 			Set<Object> batchWords = new HashSet<Object>();
-			StringBuilder sql = new StringBuilder(
-					"select word from t_p_words where word in(");
+            StringBuilder sql = new StringBuilder("select word from t_p_words where word in(");
+
 			for (Iterator<String> iter = words.iterator(); iter.hasNext();) {
 				String word = iter.next();
 				batchWords.add(word);
@@ -266,27 +306,23 @@ public class ProductIndexer implements Indexer {
 						params);
 			} catch (Exception e) {
 				L.error(e);
-			}
-		}
+            }
+        }
 
-	}
+    }
 
+    /**
+     * 查询t_p_brand中的品牌中文名称
+     * @return
+     * @throws Exception
+     */
 	private Set<String> loadBrandWords() throws Exception {
 		JdbcTemplate template = DataSourceManager.getJdbcTemplate();
 		List<String> items = template.findList("select CNName from t_p_brand where status=1", null,
 				0, 0, StringPropertyHandler.getInstance());
 		Set<String> set = new HashSet<String>(items.size());
-		for (String item : items) {
-			List<String> tokens = TokenUtil.tokenizeChinese(item);
-			if (tokens == null) {
-				continue;
-			}
-			for (String token : tokens) {
-				if (TokenUtil.isChineseChar(token.charAt(0))) {
-					set.add(token);
-				}
-			}
-		}
-		return set;
+
+        TokenUtil.validateChineseCharAndAddToSet(items, set);
+        return set;
 	}
 }

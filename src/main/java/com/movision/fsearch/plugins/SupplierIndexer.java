@@ -145,6 +145,7 @@ public class SupplierIndexer implements Indexer {
             String registerTime = FormatUtil.parseString(docAsMap.get("registerTime"));
             memberService.analysTime(docAsMap, registerTime);
         }
+        //identify
         {
             String identify = FormatUtil.parseString(docAsMap.get("identify"));
             if (identify.contains("3")) {
@@ -168,7 +169,7 @@ public class SupplierIndexer implements Indexer {
                 docAsMap.put("viplevel", "");
             }
         }
-        //weightLevel
+        //weightLevel 供应商排序权重=∑（权重×评分）
         {
             List<Factor> factors = new ArrayList<>();
             Factor factor = new Factor();

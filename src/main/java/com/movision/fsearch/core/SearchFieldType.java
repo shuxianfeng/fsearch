@@ -1,5 +1,11 @@
 package com.movision.fsearch.core;
 
+/**
+ * 搜索字段类型
+ *
+ * @Author zhuangyuhao
+ * @Date 2017/3/20 10:14
+ */
 public interface SearchFieldType {
 
 	public static final int TYPE_STRING = 1;
