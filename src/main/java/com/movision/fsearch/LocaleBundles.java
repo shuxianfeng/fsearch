@@ -8,12 +8,12 @@ import com.petkit.base.locale.LocaleBundle;
 import com.petkit.base.utils.FileUtil;
 
 /**
- * 错误信息加载类
- * 加载conf/locale/error路径下的配置文件
+ * 加载conf/locale/error路径下的配置文件,即中文异常配置文件：zh_CN.properties
  */
 public class LocaleBundles {
 	private static LocaleBundle DEFAULT = null;
-	static {
+
+    static {
 		try {
 			ClassPathPropertiesLocaleBundleOptions options = new ClassPathPropertiesLocaleBundleOptions();
 			options.setDefaultLocale("zh_CN");

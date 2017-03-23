@@ -27,7 +27,7 @@ import com.movision.fsearch.exception.UnknownApiException;
 import com.movision.fsearch.util.SignUtil;
 
 /**
- *
+ * SearchServlet
  */
 public class SearchServlet extends HttpServlet {
 
@@ -47,6 +47,14 @@ public class SearchServlet extends HttpServlet {
 	public SearchServlet() {
 	}
 
+	/**
+	 * 输出json对象
+	 *
+	 * @param response
+	 * @param status
+	 * @param s
+	 * @return
+	 */
 	private static boolean outputJSON(HttpServletResponse response, int status,
 			String s) {
 		try {
@@ -62,6 +70,12 @@ public class SearchServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * 处理httpPost请求
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
 	private Object handle(HttpServletRequest request) throws Exception {
 
 		Map<String, String> kv = new HashMap<String, String>(KEYS.length);
@@ -184,6 +198,12 @@ public class SearchServlet extends HttpServlet {
 		return searcher.searchForPage(query, sort, fields, offset, limit);
 	}
 
+	/**
+	 * 输出api结果
+	 * @param response
+	 * @param t
+	 * @param ret
+	 */
 	private void outputApiResult(HttpServletResponse response, Throwable t,
 			Object ret) {
 		Object result = null;
@@ -209,6 +229,13 @@ public class SearchServlet extends HttpServlet {
 		outputJSON(response, HttpServletResponse.SC_OK, resultAsJSONStr);
 	}
 
+	/**
+	 * 处理HttpServletRequest请求
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	private void handleRequest(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		try {
@@ -220,11 +247,25 @@ public class SearchServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * doPost处理请求
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(request, response);
 	}
 
+	/**
+	 * doGet处理请求
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(request, response);

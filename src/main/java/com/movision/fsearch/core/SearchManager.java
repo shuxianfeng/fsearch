@@ -21,7 +21,7 @@ public class SearchManager {
     private static final Map<String, Searcher> SEARCHERS = new HashMap<>(0);
 
     /**
-     * 初始化SEARCHERS
+     * 初始化SEARCHERS, 加载conf/searchers下面的所有ini文件中的数据
      */
     static {
         try {
@@ -30,16 +30,16 @@ public class SearchManager {
                 /**
                  * 封装Searcher中的 SearcherOptions 和 PropertiesConfig
                  *
-                 * @param fileName
+                 * @param fileName ini文件名，如product.ini
                  * @param fullPath
                  * @param in
                  * @throws Exception
                  */
                 @Override
                 public void streamOpened(String fileName, String fullPath, InputStream in) throws Exception {
-                    if (fileName.startsWith("_")) {
+                    /*if (fileName.startsWith("movision")) {
                         return;
-                    }
+                    }*/
                     PropertiesConfig config = new PropertiesConfig(in, false);
                     Map<String, Object> map = config.getAll();
 
@@ -82,13 +82,13 @@ public class SearchManager {
                             fieldList.add(f);
                         }
 
-                        // todo 若当前处理工程商搜索，则增加工程商资质相关字段
-                        if ("contractor".equals(options.getName())) {
+                        // 若当前处理工程商搜索，则增加工程商资质相关字段
+                        /*if ("contractor".equals(options.getName())) {
                             ContractorService contractorService = new ContractorService();
                             //构建资质搜索字段
                             List<SearchField> certificateSearchFieldList = contractorService.findContractorCertificateSearchField();
                             fieldList.addAll(certificateSearchFieldList);
-                        }
+                        }*/
 
                         options.setFields(fieldList);
                     }

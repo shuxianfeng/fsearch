@@ -14,13 +14,14 @@ public class SearchTest extends TestCase {
 
     private static void request(String api, Map<String, Object> params)
             throws Exception {
+
         HttpClient client = new HttpClient();
         Map<String, Object> headers = CollectionUtil.arrayAsMap("X-Search-Api",
-                api, "X-Search-Key", "fsearch", "X-Search-Time", "123");
+                api, "X-Search-Key", "fsearch", "X-Search-Time", "nope");
         String secret = "81ac307f7d4547b787aed88f1dc509d6";
         String sign = SignUtil.makeSign(headers, secret);
         headers.put("X-Search-Sign", sign);
-        client.doPost("http://localhost:10010/search", params, headers);
+        client.doPost("http://localhost:10010/", params, headers);
         System.out.println(client.getResponseBody());
     }
 
@@ -111,22 +112,21 @@ public class SearchTest extends TestCase {
 				CollectionUtil.arrayAsMap("table", "product", "query",
 						JSONUtil.toJSONString(query3)));*/
 
-        query.put("_s",
-                CollectionUtil.arrayAsMap("type", "phrase", "value", "东大智能"));
+        query.put("_s", CollectionUtil.arrayAsMap("type", "phrase", "value", "小猴"));
         List<Map<String,Object>> sortFields = new ArrayList<>();
 
         Map<String,Object> sortField = new HashMap<>();
-        sortField.put("field", "certLevel");
-        sortField.put("type", "LONG");
+        sortField.put("field", "onlinetime");
+        sortField.put("type", "String");
         sortField.put("reverse",FormatUtil.parseBoolean("true"));
         sortFields.add(sortField);
 
         request("search",
-                CollectionUtil.arrayAsMap("table", "contractor",
+                CollectionUtil.arrayAsMap("table", "movision_product",
                         "query",JSONUtil.toJSONString(query),
                         "sort",JSONUtil.toJSONString(sortFields),
                         "offset","0",
-                        "limit","70"));
+                        "limit", "5"));
        /*
         Map<String, Object> query2 = new HashMap<String, Object>();
         query2.put("province",

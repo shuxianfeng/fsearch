@@ -31,7 +31,15 @@ public class QueryUtil {
 		DEFAULT_SEARCH_FIELD.setType(SearchFieldType.TYPE_STRING);
 	}
 
-	public static Query parseQuery(Searcher searcher,
+    /**
+     * 解析Query对象
+     *
+     * @param searcher
+     * @param queryAsMap
+     * @return
+     * @throws Exception
+     */
+    public static Query parseQuery(Searcher searcher,
 			Map<String, Object> queryAsMap) throws Exception {
 		if (queryAsMap == null || queryAsMap.isEmpty()) {
 			return new MatchAllDocsQuery();
@@ -50,8 +58,11 @@ public class QueryUtil {
 			SearchField sField = searcher.getOptions().findField(field);
 			if (sField == null) {
 				sField = DEFAULT_SEARCH_FIELD;
-			}
-			switch (type) {
+            }
+            switch (type) {
+                /**
+                 * 精确查询
+				 */
 				case "equal":
 					if (sField.getType() == SearchFieldType.TYPE_STRING) {
 						query = new TermQuery(new Term(field, value.toString()));
@@ -73,8 +84,11 @@ public class QueryUtil {
 								doubleValue, doubleValue, true, true);
 					} else {
 						throw new ArgumentApiException("query");
-					}
-					break;
+                    }
+                    break;
+                /**
+                 * 区间查询
+				 */
 				case "numberrange":
 					boolean minInclusive = FormatUtil.parseBoolean(valueAsMap
 							.get("minInclusive"));
@@ -102,8 +116,11 @@ public class QueryUtil {
 								minInclusive, maxInclusive);
 					} else {
 						throw new ArgumentApiException("query");
-					}
-					break;
+                    }
+                    break;
+                /**
+				 *
+				 */
 				case "phrase":
 					MMSeg mmSeg = new MMSeg(new StringReader(value.toString()),
 							TokenUtil.getComplexSeg());

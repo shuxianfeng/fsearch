@@ -23,9 +23,8 @@ public class AccountManager {
 			for (Object account : accounts) {
 				Map<?, ?> accountAsMap = (Map<?, ?>) account;
 
-				ACCOUNTS.put(accountAsMap.get("key").toString(), accountAsMap
-						.get("secret").toString());
-			}
+                ACCOUNTS.put(accountAsMap.get("key").toString(), accountAsMap.get("secret").toString());
+            }
 		} catch (Exception e) {
 			L.error("Failed to load AccountManager", e);
 			System.exit(-1);

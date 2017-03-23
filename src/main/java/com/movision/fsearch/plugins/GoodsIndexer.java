@@ -250,6 +250,7 @@ public class GoodsIndexer implements Indexer {
                 }
                 //把搜索结果文档添加到索引中
                 IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Searcher.ANALYZER));
+                //开始索引过程
                 writer.addDocuments(documents);
                 writer.close();
                 total += documents.size();

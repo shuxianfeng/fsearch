@@ -13,19 +13,35 @@ public class JdbcTemplateTest {
 
 	public static void main(String[] args) throws Exception {
 		JdbcTemplate template = DataSourceManager.getJdbcTemplate();
-		String sql = "select p.*, m.enterpriseName member_enterpriseName, m.identify member_identify, m.province member_province, m.city member_city, b.CNName brand_CNName from t_p_product p left outer join t_m_member m on m.id=p.createid left outer join t_p_brand b on b.id=p.brandid";
+        String sql = "SELECT g.*," +
+                "   (CASE g.protype" +
+                "   WHEN 0 THEN '摄影机'" +
+                "   WHEN 1 THEN '摄像机'" +
+                "   WHEN 2 THEN '镜头'" +
+                "   WHEN 3 THEN '三脚架'" +
+                "   WHEN 4 THEN '滤镜'" +
+                "   WHEN 5 THEN '滑轨'" +
+                "   WHEN 6 THEN '轨道'" +
+                "   WHEN 7 THEN '灯具'" +
+                "   END) AS protypeName, b.brandname as brand_CNName" +
+                "   FROM yw_goods g left join yw_brand b on b.brandid = g.brandid ";
+
 		List<Map<String, Object>> docs = template.findList(sql, null, 0, 10,
 				MultiTableMapHandler.CASESENSITIVE);
+
 		for (Map<String, Object> docAsMap : docs) {
-			Map<String, Object> doc = new HashMap<String, Object>();
+
+            Map<String, Object> doc = new HashMap<String, Object>();
 			for (Entry<String, Object> field : docAsMap.entrySet()) {
 				String key = null;
-				if (field.getKey().startsWith("t_m_member.")) {
-					key = "member_"
-							+ field.getKey().substring(
+
+                if (field.getKey().startsWith("yw_brand.")) {
+                    key = "brand_"
+                            + field.getKey().substring(
 									field.getKey().indexOf('.') + 1);
 				} else {
-					key = field.getKey().substring(
+
+                    key = field.getKey().substring(
 							field.getKey().indexOf('.') + 1);
 				}
 				if (field.getValue() == null) {

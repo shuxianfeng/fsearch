@@ -59,8 +59,15 @@ import com.petkit.base.utils.FormatUtil;
 import com.petkit.base.utils.StringUtil;
 import com.movision.fsearch.analysis.ComplexAnalyzer;
 
+/**
+ * 这个类用来读取就使用Lucene库的原始数据，并搜索数据的索引
+ *
+ * @Author zhuangyuhao
+ * @Date 2017/3/22 14:10
+ */
 public class Searcher {
     //实例化中文词法分析器
+    //Analyzer类负责分析一个文件，并从将被索引的文本获取令牌/字。不加分析完成后，IndexWriter不能创建索引。
     public static final Analyzer ANALYZER = new ComplexAnalyzer();
     public static final String SPLIT = ",";
     public static final String TOKEN = " ";
@@ -74,7 +81,6 @@ public class Searcher {
     private Indexer indexer;
 
     /**
-     *
      * @param options
      * @param config
      */
@@ -98,9 +104,19 @@ public class Searcher {
         }
 
         try {
-            //实例化索引
-            indexer = (Indexer) Class.forName(options.getFullIndexer())
-                    .newInstance();
+            /**
+             * 类加载方式实例化索引。
+             * Class下的newInstance()的使用有局限，因为它生成对象只能调用无参的构造函数
+             * 即首先调用Class加载方法加载某个类，然后实例化
+             *
+             * 但是使用newInstance()方法的时候，就必须保证：
+             *  1、这个类已经加载；
+             *  2、这个类已经连接了。
+             *
+             *  目的：为了一次性加载多个自定义的Indexer
+             */
+            // 2017/3/21 indexer=null? 实例化不了    fullIndexer = GoodsIndexer
+            indexer = (Indexer) Class.forName(options.getFullIndexer()).newInstance();
             //初始化索引
             indexer.init(options, config);
         } catch (Exception e) {
@@ -167,6 +183,7 @@ public class Searcher {
 
     /**
      * 通过FSDirectory类加载一个文件目录
+     *
      * @return
      * @throws Exception
      */
@@ -234,7 +251,7 @@ public class Searcher {
         }
         IndexWriter writer = null;
         try {
-        	//通过IndexWriter对象来创建索引
+            //通过IndexWriter对象来创建索引
             writer = new IndexWriter(directory, indexConfig);
             writer.addDocuments(docs);
         } finally {
@@ -275,11 +292,12 @@ public class Searcher {
 
     /**
      * 分页搜索
+     *
      * @param query
      * @param sortFields
      * @param fields
-     * @param offset    分页起始值，如第一页0, offset 0 limit 20，第二页 offset 20, limit 20
-     * @param limit 每页显示的数目，如20
+     * @param offset     分页起始值，如第一页0, offset 0 limit 20，第二页 offset 20, limit 20
+     * @param limit      每页显示的数目，如20
      * @return
      * @throws Exception
      */
@@ -348,15 +366,14 @@ public class Searcher {
                 }
                 items.add(item);
             }
-            // TODO: 2017/3/16  对产品搜索特殊处理
             /**
-             * 封装productGroups
+             * 封装productGroups 对产品搜索特殊处理
              */
-            if (options.getName().equals("product")) {
+            if (options.getName().equals("movision_product")) {
                 List<ProductGroup> productGroups = new ArrayList<>();
                 if (!items.isEmpty()) {
 
-                    ProductGroup scateGroup = groupByField(searcher, query, "scateid1");
+                    ProductGroup scateGroup = groupByField(searcher, query, "protype1");
                     if (null != scateGroup) {
                         productGroups.add(scateGroup);
                     }
@@ -378,7 +395,8 @@ public class Searcher {
 
 
     /**
-     *  根据groupField封装成ProductGroup
+     * 根据groupField封装成ProductGroup
+     *
      * @param searcher
      * @param query
      * @param groupField 要分组的字段的名称
@@ -406,8 +424,8 @@ public class Searcher {
 
         ProductGroup productGroup = new ProductGroup();
 
-        if (groupField.equals("scateid1")) {
-            productGroup.setKey("scateid");
+        if (groupField.equals("protype1")) {
+            productGroup.setKey("protype");
             productGroup.setName("产品分类");
 
         } else if (groupField.equals("brandid1")) {
@@ -433,8 +451,8 @@ public class Searcher {
                 Document doc = searcher.doc(groupDocs.scoreDocs[0].doc);
 
                 String groupName = "其它";
-                if (groupField.equals("scateid1")) {
-                    groupName = doc.get("scate_name");
+                if (groupField.equals("protype1")) {
+                    groupName = doc.get("protype_name");
                 } else if (groupField.equals("brandid1")) {
                     groupName = doc.get("brand_CNName");
                 }
@@ -449,7 +467,7 @@ public class Searcher {
     }
 
     public Document parseDocument(Map<String, Object> docAsMap) {
-        boolean test=false;
+        boolean test = false;
         Document doc = new Document();
         // StringBuilder generalTokenized = options.getGeneralSearchField() ==
         // null ? null
@@ -479,8 +497,8 @@ public class Searcher {
                 if (value instanceof Map) {
                     Map<?, ?> valueAsMap = (Map<?, ?>) value;
                     strValue = FormatUtil.parseString(valueAsMap.get("value"));
-                    store = FormatUtil.parseBoolean(valueAsMap.get("store"),store);
-                    index = FormatUtil.parseBoolean(valueAsMap.get("index"),index);
+                    store = FormatUtil.parseBoolean(valueAsMap.get("store"), store);
+                    index = FormatUtil.parseBoolean(valueAsMap.get("index"), index);
                     tokenized = FormatUtil.parseBoolean(valueAsMap.get("tokenized"), tokenized);
                     generalSearch = FormatUtil.parseBoolean(valueAsMap.get("generalSearch"), generalSearch);
                 }
