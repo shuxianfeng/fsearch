@@ -15,3 +15,8 @@ then
 fi
 
 mvn install:install-file -Dfile="$projectDir/src/main/lib/petkit-base.jar" -DgroupId=com.petkit -DartifactId=petkit-base -Dversion=4.0 -Dpackaging=jar
+
+mvn clean install -Dmaven.test.skip=true -Pdevelopment
+result=$?
+if [ $result -ne 0 ]; then echo "mvn Bad result $result"; exit $result
+fi
