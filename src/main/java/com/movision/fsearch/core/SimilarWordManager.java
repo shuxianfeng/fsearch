@@ -18,12 +18,16 @@ public class SimilarWordManager {
 	private static Map<String, List<String>> SIMILAR_WORD_MAP = new HashMap<String, List<String>>(
 			0);
 
-	static {
+    /**
+     * 在t_goods_words_similar表中查找所有的相似词，并放入SIMILAR_WORD_MAP中。
+     */
+    static {
 		List<Map<String, Object>> items;
 		try {
-			items = DataSourceManager.getJdbcTemplate().findList(
-					"select w,s from t_p_word_similar", null, 0, 0,
-					MapHandler.CASESENSITIVE);
+            //t_goods_words_similar
+            items = DataSourceManager.getJdbcTemplate().findList(
+                    "select w,s from t_goods_words_similar", null, 0, 0,
+                    MapHandler.CASESENSITIVE);
 			Map<String, List<String>> similarMap = new HashMap<String, List<String>>(
 					0);
 			for (Map<String, Object> item : items) {
@@ -42,7 +46,14 @@ public class SimilarWordManager {
 		}
 	}
 
-	public static List<String> findSimilarWords(String w)
+    /**
+     * 在SIMILAR_WORD_MAP中寻找相似的词
+     *
+     * @param w
+     * @return
+     * @throws RepositoryException
+     */
+    public static List<String> findSimilarWords(String w)
 			throws RepositoryException {
 		if (w == null || w.length() == 0) {
 			return null;
@@ -51,15 +62,22 @@ public class SimilarWordManager {
 			return null;
 		}
 		return SIMILAR_WORD_MAP.get(w);
-	}
+    }
 
+    /**
+     * 新增t_goods_words_similar中的相似词
+     *
+     * @param w1
+     * @param w2
+     * @throws RepositoryException
+     */
 	public static void create(String w1, String w2) throws RepositoryException {
 		if (w1 == null || w2 == null) {
 			return;
 		}
 		JdbcTemplate template = DataSourceManager.getJdbcTemplate();
-		String s = template.find("select s from t_p_word_similar where w=?",
-				new Object[] { w1 }, StringPropertyHandler.getInstance());
+        String s = template.find("select s from t_goods_words_similar where w=?",
+                new Object[] { w1 }, StringPropertyHandler.getInstance());
 		List<String> words = null;
 		if (s == null) {
 			words = new ArrayList<String>(0);
@@ -77,11 +95,11 @@ public class SimilarWordManager {
 			similarWords.remove(word);
 			String similarWordsAsStr = StringUtil.join(similarWords, ",");
 			boolean updated = template.update(
-					"update t_p_word_similar set s=? where w=?", new Object[] {
-							similarWordsAsStr, word }) > 0;
-			if (!updated) {
-				template.update("insert into t_p_word_similar(w,s) values(?,?)",
-						new Object[] { word, similarWordsAsStr });
+                    "update t_goods_words_similar set s=? where w=?", new Object[] {
+                            similarWordsAsStr, word }) > 0;
+            if (!updated) {
+                template.update("insert into t_goods_words_similar(w,s) values(?,?)",
+                        new Object[] { word, similarWordsAsStr });
 			}
 		}
 

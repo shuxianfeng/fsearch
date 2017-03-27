@@ -97,7 +97,7 @@ public class GoodsIndexer implements Indexer {
     }
 
     /**
-     * 批量新增
+     * 批量新增t_goods_words中的word
      *
      * @param words
      * @throws Exception
@@ -174,6 +174,13 @@ public class GoodsIndexer implements Indexer {
     }
 
 
+    /**
+     * 完整的索引过程
+     *
+     * @param searcher
+     * @return
+     * @throws Exception
+     */
     @Override
     public Path fullIndex(Searcher searcher) throws Exception {
 
@@ -183,7 +190,7 @@ public class GoodsIndexer implements Indexer {
         File dir = new File(options.getPath() + "-" + dateFormat.format(new Date()));
         dir.mkdirs();
         Path path = dir.toPath();
-        // 获取一个存储在文件系统中的索引的位置
+        // 获取一个存储在文件系统中的索引的位置, 创建IndexWriter 应指向位置，其中索引是存储一个lucene的目录
         Directory directory = SimpleFSDirectory.open(path);
 
         try {
@@ -194,6 +201,9 @@ public class GoodsIndexer implements Indexer {
             JdbcTemplate template = DataSourceManager.getJdbcTemplate();
             int total = 0;
             while (true) {
+                /**
+                 * 1 从数据库中查询所有数据
+                 */
                 Object[] params = null;
                 //构建sql
                 //yw_goods：商品名称、品牌、产品分类
@@ -208,8 +218,10 @@ public class GoodsIndexer implements Indexer {
                         "   WHEN 5 THEN '滑轨'" +
                         "   WHEN 6 THEN '轨道'" +
                         "   WHEN 7 THEN '灯具'" +
-                        "   END) AS protypeName, b.brandname as brand_CNName" +
-                        "   FROM yw_goods g left join yw_brand b on b.brandid = g.brandid ";
+                        "   END) AS protype_name, " +
+                        "  b.brandname, i.img_url as img_url" +
+                        "   FROM yw_goods g left join yw_brand b on b.brandid = g.brandid " +
+                        " left join yw_goods_img i on i.goodsid= g.id and i.type=2 ";
 
                 if (lastId != null) {
                     params = new Object[]{lastId};
@@ -226,31 +238,46 @@ public class GoodsIndexer implements Indexer {
                 //获取结果中最后一条数据的id
                 lastId = docs.get(docs.size() - 1).get("yw_goods.id");
                 List<Document> documents = new ArrayList<Document>(docs.size());
-                //遍历查询结果
+                /**
+                 * 2 遍历查询结果，并把搜索结果放入文档中
+                 */
                 for (Map<String, Object> docAsMap : docs) {
                     Map<String, Object> doc = new HashMap<String, Object>();
 
                     for (Map.Entry<String, Object> field : docAsMap.entrySet()) {
 
                         //这边把查询结果中的字段前的表名去掉，如yw_goods.id ——> id
+                        /*String key = null;
+                        if (field.getKey().startsWith("yw_brand.")) {
+                            key = "brand_" + field.getKey().substring(field.getKey().indexOf('.') + 1);
+                        }else if(field.getKey().startsWith("yw_goods_img.")){
+                            key = "img_" + field.getKey().substring(field.getKey().indexOf('.') + 1);
+                        }else{
+                            key = field.getKey().substring(field.getKey().indexOf('.') + 1);
+                        }*/
                         String key = field.getKey().substring(field.getKey().indexOf('.') + 1);
+
                         if (field.getValue() == null) {
                             continue;
                         }
                         doc.put(key, field.getValue());
                     }
-
+                    //修改搜索的行数据
                     Map<String, Object> parsedDoc = parseRawDocument(doc);
-                    //生成搜索结果文档
+                    //解析行数据，并放入文档
                     Document document = searcher.parseDocument(parsedDoc);
                     if (L.isInfoEnabled()) {
                         L.info(this.getClass() + " saving document: " + document);
                     }
                     documents.add(document);
                 }
-                //把搜索结果文档添加到索引中
+                /**
+                 * 3 把搜索结果文档添加到索引中（用来创建索引）
+                 */
                 IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(Searcher.ANALYZER));
-                //开始索引过程
+                /**
+                 * 4 开始索引过程
+                 */
                 writer.addDocuments(documents);
                 writer.close();
                 total += documents.size();
@@ -297,6 +324,8 @@ public class GoodsIndexer implements Indexer {
         {
             String publishtime = FormatUtil.parseString(docAsMap.get("onlinetime"));
             if (null != publishtime && publishtime.length() > 0) {
+                //Java.util.Date该用什么field呢？这也是被问的频率比较高的一个问题，
+                //  Lucene并没有提供DateField,请使用LongField代替，把Date转成毫秒数就OK了
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date date = sdf.parse(publishtime);
                 publishtime = DateTools.dateToString(date, DateTools.Resolution.SECOND);

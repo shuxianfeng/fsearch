@@ -21,7 +21,7 @@ public class SearchTest extends TestCase {
         String secret = "81ac307f7d4547b787aed88f1dc509d6";
         String sign = SignUtil.makeSign(headers, secret);
         headers.put("X-Search-Sign", sign);
-        client.doPost("http://localhost:10010/", params, headers);
+        client.doPost("http://localhost:10010/search", params, headers);
         System.out.println(client.getResponseBody());
     }
 

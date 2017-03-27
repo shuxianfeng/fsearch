@@ -113,9 +113,8 @@ public class Searcher {
              *  1、这个类已经加载；
              *  2、这个类已经连接了。
              *
-             *  目的：为了一次性加载多个自定义的Indexer
+             *  目的：为了一次性加载多个自定义的Indexer(工厂模式)
              */
-            // 2017/3/21 indexer=null? 实例化不了    fullIndexer = GoodsIndexer
             indexer = (Indexer) Class.forName(options.getFullIndexer()).newInstance();
             //初始化索引
             indexer.init(options, config);
@@ -144,12 +143,16 @@ public class Searcher {
     }
 
 
+    /**
+     * 构建所有索引
+     */
     private void buildFullIndexes() {
         try {
             long t1 = System.currentTimeMillis();
             if (L.isInfoEnabled()) {
                 L.info("FullIndex start: " + options.getFullIndexer());
             }
+            //Lucene索引过程
             Path newPath = indexer.fullIndex(this);
             long t2 = System.currentTimeMillis();
             if (L.isInfoEnabled()) {
@@ -302,7 +305,9 @@ public class Searcher {
      * @throws Exception
      */
     public Pagination<Map<String, Object>, ProductGroup> searchForPage(Query query,
-                                                                       SortField[] sortFields, Collection<String> fields, int offset,
+                                                                       SortField[] sortFields,
+                                                                       Collection<String> fields,
+                                                                       int offset,
                                                                        int limit) throws Exception {
         /**
          * 1 获取分页的传参：total, offset, limit
@@ -314,6 +319,7 @@ public class Searcher {
         if (limit <= 0 || limit > maxDocs) {
             limit = 10;
         }
+        //排序字段不为空，则实例化Sort; 若为空，则默认按照字段得分排序
         Sort sort;
         if (sortFields != null) {
             sort = new Sort(sortFields);
@@ -331,14 +337,17 @@ public class Searcher {
         DirectoryReader reader = null;
         IndexSearcher searcher;
         try {
+            //1 先创建目录，包含索引
             directory = openDirectory();
+            //2 使用IndexReader打开目录
             reader = DirectoryReader.open(directory);
+            //3 创建一个期限查询，使搜索usingIndexSearcher通过将查询到的搜索
             searcher = new IndexSearcher(reader);
             //TopFieldCollector实现索引排序和分页
             //返回命中数
             TopFieldCollector results = TopFieldCollector.create(sort, offset + limit, false, false, false);
             searcher.search(query, results);
-            //搜索结果
+            //搜索结果。indexSearcher返回TopDocs对象包含搜索信息连同它是搜索操作的结果的文档的文档ID(多个)。
             ScoreDoc[] hits = results.topDocs(offset, limit).scoreDocs;
             int total = results.getTotalHits();
             if (total <= offset) {
@@ -433,7 +442,6 @@ public class Searcher {
             productGroup.setName("品牌");
         }
 
-
         /**
          *  下面是封装List<GroupValue>
          */
@@ -454,7 +462,7 @@ public class Searcher {
                 if (groupField.equals("protype1")) {
                     groupName = doc.get("protype_name");
                 } else if (groupField.equals("brandid1")) {
-                    groupName = doc.get("brand_CNName");
+                    groupName = doc.get("brandname");
                 }
                 values.add(new GroupValue(groupId, groupName));
             } else {
@@ -466,6 +474,12 @@ public class Searcher {
         return productGroup;
     }
 
+    /**
+     * 把查询到的字段添加到文档对象，并返回
+     *
+     * @param docAsMap
+     * @return
+     */
     public Document parseDocument(Map<String, Object> docAsMap) {
         boolean test = false;
         Document doc = new Document();
@@ -565,12 +579,16 @@ public class Searcher {
                 }
                 if (!group) {
                     if (index || store) {
-                        FieldType fType = new FieldType();
-                        fType.setStored(store);
+                        FieldType fType = new FieldType();  //描述一个字段的属性。
+                        fType.setStored(store); //设置为true存储该字段
                         if (index) {
+                            //setIndexOptions: 设置字段的索引选项：
+                            //DOCS_AND_FREQS_AND_POSITIONS: 索引文件，频率和位置。
                             fType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+                            //设置为true通过配置对该字段的内容进行标记Analyzer。
                             fType.setTokenized(tokenized);
                         } else {
+                            //NONE:未编入索引
                             fType.setIndexOptions(IndexOptions.NONE);
                         }
                         f = new Field(key, strValue, fType);

@@ -22,6 +22,9 @@ public class SearchField {
 	 */
 	private boolean tokenized = true;
 
+	/**
+	 * 表示搜索时是否覆盖该字段
+	 */
 	private boolean generalSearch;
 
 	private boolean group = false;

@@ -17,6 +17,7 @@ public interface Indexer {
     void init(SearcherOptions options, PropertiesConfig config) throws Exception;
 
     /**
+     * 完整的索引过程
      * 根据搜索结果创建索引（把Documents添加到指定的Directory的索引中）
      * @param searcher
      * @return

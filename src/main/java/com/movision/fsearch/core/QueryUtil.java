@@ -130,9 +130,8 @@ public class QueryUtil {
 					// phraseQuery.setSlop(Integer.MAX_VALUE);
 					while ((word = mmSeg.next()) != null) {
 						String w = word.getString();
-						List<String> similarWords = SimilarWordManager
-								.findSimilarWords(w);
-						Query q;
+                        List<String> similarWords = SimilarWordManager.findSimilarWords(w);
+                        Query q;
 						if (CollectionUtil.isEmpty(similarWords)) {
 							q = new TermQuery(new Term(field, w));
 						} else {
@@ -184,8 +183,8 @@ public class QueryUtil {
 				}
 				fields.add(field);
 				SortField.Type type = SortField.Type.valueOf(FormatUtil
-						.parseString(sortAsMap.get("type")));
-				boolean reverse = FormatUtil.parseBoolean(sortAsMap
+                        .parseString(sortAsMap.get("type")).toUpperCase());
+                boolean reverse = FormatUtil.parseBoolean(sortAsMap
 						.get("reverse"));
 				sortFields[i] = new SortField(field, type, reverse);
 				i++;
