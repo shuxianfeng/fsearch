@@ -5,6 +5,12 @@
 #className=com.movision.fsearch.Main
 #java -cp "$baseDir/target/lib/*" $className &
 
+#JDK所在路径
+JAVA_HOME="/usr/java/jdk1.8.0_111"
+
+#执行程序启动所使用的系统用户，考虑到安全，推荐不使用root帐号
+RUNNING_USER=root
+
 #Java程序所在的目录
 APP_HOME=/home/app/projects/fsearch
 
@@ -17,5 +23,7 @@ for i in "$APP_HOME"/lib/*.jar; do
    CLASSPATH="$CLASSPATH":"$i"
 done
 
-java -classpath $CLASSPATH $APP_MAINCLASS &
+echo -n "Starting $APP_MAINCLASS ..."
+JAVA_CMD="nohup $JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH $APP_MAINCLASS >/dev/null 2>&1 &"
+su - $RUNNING_USER -c "$JAVA_CMD"
 
