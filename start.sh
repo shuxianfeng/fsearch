@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #prepare
 #baseDir=$(cd "$(dirname "$0")"; pwd)
 #baseDir=/home/app/projects/fsearch
