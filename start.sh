@@ -17,6 +17,9 @@ APP_HOME=/home/app/projects/fsearch
 #需要启动的Java主程序（main方法类）
 APP_MAINCLASS=com.movision.fsearch.Main
 
+#java虚拟机启动参数
+JAVA_OPTS="-ms512m -mx512m -Xmn256m -Djava.awt.headless=true -XX:MaxPermSize=128m -Ddefault.client.encoding=UTF-8 -Dfile.encoding=UTF-8"
+
 #拼凑完整的classpath参数，包括指定lib目录下所有的jar
 CLASSPATH=$APP_HOME/classes
 for i in "$APP_HOME"/lib/*.jar; do
