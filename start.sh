@@ -12,7 +12,7 @@ JAVA_HOME="/usr/java/jdk1.8.0_111"
 RUNNING_USER=root
 
 #Java程序所在的目录
-APP_HOME=/home/app/projects/fsearch
+APP_HOME=/home/app/projects/fsearch/target
 
 #需要启动的Java主程序（main方法类）
 APP_MAINCLASS=com.movision.fsearch.Main
