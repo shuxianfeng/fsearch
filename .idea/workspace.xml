@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3d95715c-2e10-44af-a758-fb8d7870cb8c" name="Default" comment="">
+    <list default="true" id="3d95715c-2e10-44af-a758-fb8d7870cb8c" name="Default" comment="查询post：增加activeType">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/movision/fsearch/plugins/PostIndexer.java" afterPath="$PROJECT_DIR$/src/main/java/com/movision/fsearch/plugins/PostIndexer.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_post.ini" afterPath="$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_post.ini" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_product.ini" afterPath="$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_product.ini" />
     </list>
     <ignored path="fsearch.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,14 +37,34 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PostIndexer.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="PostIndexer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/movision/fsearch/plugins/PostIndexer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="605">
-              <caret line="187" column="74" selection-start-line="187" selection-start-column="74" selection-end-line="187" selection-end-column="74" />
+            <state relative-caret-position="595">
+              <caret line="74" column="37" selection-start-line="74" selection-start-column="37" selection-end-line="74" selection-end-column="37" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="movision_post.ini" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_post.ini">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="742">
+              <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="movision_product.ini" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_product.ini">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="560">
+              <caret line="16" column="52" selection-start-line="16" selection-start-column="52" selection-end-line="16" selection-end-column="52" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -107,14 +129,14 @@
         <option value="$PROJECT_DIR$/src/main/java/com/movision/fsearch/core/QueryUtil.java" />
         <option value="$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/config.ini" />
         <option value="$PROJECT_DIR$/src/main/java/com/movision/fsearch/plugins/GoodsIndexer.java" />
-        <option value="$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_product.ini" />
         <option value="$PROJECT_DIR$/src/main/java/com/movision/fsearch/core/Searcher.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/movision/fsearch/core/SearchField.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/movision/fsearch/plugins/PostIndexer.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/install-lib.sh" />
         <option value="$PROJECT_DIR$/start.sh" />
+        <option value="$PROJECT_DIR$/src/main/java/com/movision/fsearch/plugins/PostIndexer.java" />
         <option value="$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_post.ini" />
+        <option value="$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_product.ini" />
       </list>
     </option>
   </component>
@@ -170,6 +192,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -442,9 +466,7 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
       <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -1058,7 +1080,9 @@
       <workItem from="1490593759381" duration="654000" />
       <workItem from="1490595051914" duration="33905000" />
       <workItem from="1490752966654" duration="17000" />
-      <workItem from="1492150003969" duration="948000" />
+      <workItem from="1492150003969" duration="1962000" />
+      <workItem from="1492158767011" duration="941000" />
+      <workItem from="1492398545650" duration="693000" />
     </task>
     <task id="LOCAL-00001" summary="11">
       <created>1489738266415</created>
@@ -1207,7 +1231,14 @@
       <option name="project" value="LOCAL" />
       <updated>1490682016279</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="查询post：增加activeType">
+      <created>1492150982766</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1492150982766</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1243,7 +1274,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="217086000" />
+    <option name="totallyTimeSpent" value="219734000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-11" y="-11" width="2582" height="1406" extended-state="6" />
@@ -1251,7 +1282,6 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930756" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16103059" sideWeight="0.5023438" order="7" side_tool="true" content_ui="tabs" />
@@ -1272,6 +1302,7 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930756" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930756" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
@@ -1316,7 +1347,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="11" />
     <MESSAGE value="1" />
-    <option name="LAST_COMMIT_MESSAGE" value="1" />
+    <MESSAGE value="查询post：增加activeType" />
+    <option name="LAST_COMMIT_MESSAGE" value="查询post：增加activeType" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -1485,14 +1517,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/movision/fsearch/plugins/ContractorIndexer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="864">
-          <caret line="222" column="21" selection-start-line="222" selection-start-column="8" selection-end-line="222" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/com/petkit/petkit-base/4.0/petkit-base-4.0.jar!/com/petkit/base/utils/FileUtil.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="542">
@@ -1546,13 +1570,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-328">
           <caret line="169" column="17" selection-start-line="169" selection-start-column="17" selection-end-line="169" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_product.ini">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="8" column="74" selection-start-line="8" selection-start-column="61" selection-end-line="8" selection-end-column="74" />
         </state>
       </provider>
     </entry>
@@ -1628,7 +1645,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1636,7 +1652,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="910">
           <caret line="26" column="4" selection-start-line="26" selection-start-column="4" selection-end-line="26" selection-end-column="29" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1644,7 +1659,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1652,7 +1666,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="910">
           <caret line="26" column="42" selection-start-line="26" selection-start-column="42" selection-end-line="26" selection-end-column="42" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1660,15 +1673,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="735">
           <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6195">
-          <caret line="177" column="0" selection-start-line="177" selection-start-column="0" selection-end-line="177" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1676,7 +1680,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="840">
           <caret line="24" column="34" selection-start-line="24" selection-start-column="34" selection-end-line="24" selection-end-column="34" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1684,7 +1687,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1120">
           <caret line="32" column="5" selection-start-line="32" selection-start-column="5" selection-end-line="32" selection-end-column="5" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1692,15 +1694,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="525">
           <caret line="22" column="78" selection-start-line="22" selection-start-column="78" selection-end-line="22" selection-end-column="78" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_post.ini">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="427">
-          <caret line="15" column="65" selection-start-line="15" selection-start-column="65" selection-end-line="15" selection-end-column="65" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1712,13 +1705,45 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/movision/fsearch/plugins/ContractorIndexer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="945">
+          <caret line="27" column="50" selection-start-line="27" selection-start-column="50" selection-end-line="27" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="786">
+          <caret line="83" column="45" selection-start-line="83" selection-start-column="45" selection-end-line="83" selection-end-column="45" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/movision/fsearch/plugins/PostIndexer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="605">
-          <caret line="187" column="74" selection-start-line="187" selection-start-column="74" selection-end-line="187" selection-end-column="74" />
+        <state relative-caret-position="595">
+          <caret line="74" column="37" selection-start-line="74" selection-start-column="37" selection-end-line="74" selection-end-column="37" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_post.ini">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="742">
+          <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/com/movision/fsearch/conf/searchers/movision_product.ini">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="560">
+          <caret line="16" column="52" selection-start-line="16" selection-start-column="52" selection-end-line="16" selection-end-column="52" />
+          <folding />
         </state>
       </provider>
     </entry>

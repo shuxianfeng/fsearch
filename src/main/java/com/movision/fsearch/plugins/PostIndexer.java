@@ -1,7 +1,6 @@
 package com.movision.fsearch.plugins;
 
 import com.movision.fsearch.L;
-import com.movision.fsearch.analysis.TokenUtil;
 import com.movision.fsearch.core.DataSourceManager;
 import com.movision.fsearch.core.Indexer;
 import com.movision.fsearch.core.Searcher;
@@ -9,10 +8,8 @@ import com.movision.fsearch.core.SearcherOptions;
 import com.petkit.base.config.PropertiesConfig;
 import com.petkit.base.repository.db.JdbcTemplate;
 import com.petkit.base.repository.db.MultiTableMapHandler;
-import com.petkit.base.repository.db.StringPropertyHandler;
 import com.petkit.base.utils.FileUtil;
 import com.petkit.base.utils.FormatUtil;
-import com.petkit.base.utils.StringUtil;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexWriter;
