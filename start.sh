@@ -29,7 +29,7 @@ done
 ################################################################
 
 #echo -n "Starting $APP_MAINCLASS ..."
-JAVA_CMD="nohup $JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH $APP_MAINCLASS >/dev/null 2>&1 &"
+JAVA_CMD="nohup $JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH $APP_MAINCLASS >/home/app/log/fsearch/fsearch.out 2>&1 &"
 su - $RUNNING_USER -c "$JAVA_CMD"
 
 
