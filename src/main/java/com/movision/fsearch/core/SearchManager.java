@@ -16,8 +16,12 @@ import com.petkit.base.utils.FileUtil.FileListHandler;
 import com.petkit.base.utils.FormatUtil;
 import com.petkit.base.utils.JSONUtil;
 
+/**
+ * 搜索器管理类：初始化搜索器
+ */
 public class SearchManager {
 
+    //存放搜索器的容器
     private static final Map<String, Searcher> SEARCHERS = new HashMap<>(0);
 
     /**

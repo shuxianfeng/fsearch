@@ -41,11 +41,13 @@ public class QueryUtil {
      */
     public static Query parseQuery(Searcher searcher,
 			Map<String, Object> queryAsMap) throws Exception {
+
 		if (queryAsMap == null || queryAsMap.isEmpty()) {
 			return new MatchAllDocsQuery();
 		}
 		List<Query> queries = new ArrayList<>(queryAsMap.size());
-		for (Entry<String, Object> entry : queryAsMap.entrySet()) {
+        //循环处理query对象
+        for (Entry<String, Object> entry : queryAsMap.entrySet()) {
 			String field = entry.getKey();
 			Object value = entry.getValue();
 			if (value == null) {
@@ -53,8 +55,11 @@ public class QueryUtil {
 			}
 			Map<?, ?> valueAsMap = (Map<?, ?>) value;
 			Query query;
-			String type = FormatUtil.parseString(valueAsMap.get("type"));
-			value = valueAsMap.get("value");
+            //解析query中的type参数
+            String type = FormatUtil.parseString(valueAsMap.get("type"));
+            //获取query中的value参数，即值，
+            //如： query={"_s":{"type":"phrase","value":"测试 标签"}}
+            value = valueAsMap.get("value");
 			SearchField sField = searcher.getOptions().findField(field);
 			if (sField == null) {
 				sField = DEFAULT_SEARCH_FIELD;
@@ -119,8 +124,8 @@ public class QueryUtil {
                     }
                     break;
                 /**
-				 *
-				 */
+                 * 分词查询
+                 */
 				case "phrase":
 					MMSeg mmSeg = new MMSeg(new StringReader(value.toString()),
 							TokenUtil.getComplexSeg());

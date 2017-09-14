@@ -174,19 +174,18 @@ public class SearchServlet extends HttpServlet {
 	private Object search(HttpServletRequest request) throws Exception {
 		//数据库中的表
 		String table = request.getParameter("table");
-		//把请求中的查询参数封装成map
+		//把请求中的query参数解析成map
 		Map<String, Object> queryAsMap = JSONUtil.parseAsMap(request
 				.getParameter("query"));
-		//offset
+		//解析offset
 		int offset = FormatUtil
 				.parseIntValue(request.getParameter("offset"), 0);
-		//limit
+		//解析limit
 		int limit = FormatUtil.parseIntValue(request.getParameter("limit"), 0);
-		//sort
+		//解析sort
 		List<?> sortAsList = JSONUtil.parseAsList(request.getParameter("sort"));
-		//fields
-		List<String> fields = StringUtil.split(request.getParameter("fields"),
-				",");
+		//解析fields
+		List<String> fields = StringUtil.split(request.getParameter("fields"), ",");
 		//获取对应表的搜索器
 		Searcher searcher = SearchManager.getSearcher(table);
 

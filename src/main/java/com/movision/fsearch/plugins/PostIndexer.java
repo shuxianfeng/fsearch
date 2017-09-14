@@ -88,30 +88,30 @@ public class PostIndexer implements Indexer {
                 }
                 //获取结果中最后一条数据的id
                 lastId = docs.get(docs.size() - 1).get("yw_post.id");
+                //用来存放搜索结果： Document 集合
                 List<Document> documents = new ArrayList<Document>(docs.size());
                 /**
-                 * 2 遍历查询结果，并把搜索结果放入文档中
+                 * 2 遍历查询结果，并把搜索结果放入文档 Document 中
                  */
                 for (Map<String, Object> docAsMap : docs) {
                     Map<String, Object> doc = new HashMap<String, Object>();
-
+                    //处理搜索的行数据
                     for (Map.Entry<String, Object> field : docAsMap.entrySet()) {
 
                         //这边把查询结果中的字段前的表名去掉，如yw_goods.id ——> id
                         String key = field.getKey().substring(field.getKey().indexOf('.') + 1);
-                        //针对圈子名称特殊处理
+                        //针对圈子名称，即name，这个字段做 特殊处理
                         if (key.equals("name")) {
                             key = "circlename";
                         }
-
                         if (field.getValue() == null) {
                             continue;
                         }
                         doc.put(key, field.getValue());
                     }
-                    //修改搜索的行数据
+                    //解析搜索结果的一行数据，再map中封装必要参数：_p， price1， publishTime1， brandid1， scateid1
                     Map<String, Object> parsedDoc = parseRawDocument(doc);
-                    //解析行数据，并放入文档
+                    //解析行数据，转化成Document对象
                     Document document = searcher.parseDocument(parsedDoc);
                     if (L.isInfoEnabled()) {
                         L.info(this.getClass() + " saving document: " + document);
