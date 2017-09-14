@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -27,7 +27,6 @@
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queries:5.1.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-sandbox:5.1.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-grouping:5.1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-analysis:5.1.0" level="project" />
     <orderEntry type="library" name="Maven: com.chenlb.mmseg4j:mmseg4j-core:1.10.0" level="project" />
     <orderEntry type="library" name="Maven: com.petkit:petkit-base:4.0" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.1.37" level="project" />

@@ -67,10 +67,9 @@ public class PostIndexer implements Indexer {
                  */
                 Object[] params = null;
                 //构建sql
-                String sql = " select p.*, d.begintime, d.endtime, i.imgurl, c.name, " +
+                String sql = " select p.*, d.begintime, d.endtime, c.name, " +
                         " u.nickname " +
                         " from yw_post p left join yw_active_period d on p.id=d.postid " +
-                        " left join yw_post_img i on i.postid=p.id" +
                         " left join yw_circle c on c.id=p.circleid " +
                         " left join yw_user u on u.id=p.userid  " +
                         " where p.isdel = 0";
