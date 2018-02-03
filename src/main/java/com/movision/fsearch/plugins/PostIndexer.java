@@ -112,6 +112,7 @@ public class PostIndexer implements Indexer {
 
                         if (key.equals("category")) {
                             //System.out.println("category>>" + key);
+                            key = "category";
                         }
                         if (field.getValue() == null) {
                             continue;
