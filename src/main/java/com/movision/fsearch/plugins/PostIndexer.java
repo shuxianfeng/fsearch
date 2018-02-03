@@ -106,7 +106,8 @@ public class PostIndexer implements Indexer {
                         if (key.equals("name")) {
                             key = "circlename";
                             //System.out.println("circlename????>>" + key);
-                            log.info("circlename????>>" + key);
+                            //log.info("circlename????>>" + key);
+                            L.warn("circlename????>>???????????????//////" + key);
                         }
 
                         if (key.equals("category")) {
