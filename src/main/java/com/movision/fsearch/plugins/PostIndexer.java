@@ -16,8 +16,6 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -30,7 +28,7 @@ import java.util.*;
  * @Date 2017/3/27 15:09
  */
 public class PostIndexer implements Indexer {
-    private static final Logger log = LoggerFactory.getLogger(PostIndexer.class);
+
     @Override
     public void init(SearcherOptions options, PropertiesConfig config)
             throws Exception {
@@ -105,14 +103,6 @@ public class PostIndexer implements Indexer {
                         //针对圈子名称，即name，这个字段做 特殊处理
                         if (key.equals("name")) {
                             key = "circlename";
-                            //System.out.println("circlename????>>" + key);
-                            //log.info("circlename????>>" + key);
-                            L.warn("circlename????>>???????????????//////" + key);
-                        }
-
-                        if (key.equals("category")) {
-                            //System.out.println("category>>" + key);
-                            key = "category";
                         }
                         if (field.getValue() == null) {
                             continue;
