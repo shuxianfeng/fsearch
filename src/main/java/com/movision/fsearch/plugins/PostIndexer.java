@@ -104,6 +104,9 @@ public class PostIndexer implements Indexer {
                         if (key.equals("name")) {
                             key = "circlename";
                         }
+                        if (key.equals("category")) {
+                            System.out.println("category>>" + key);
+                        }
                         if (field.getValue() == null) {
                             continue;
                         }
