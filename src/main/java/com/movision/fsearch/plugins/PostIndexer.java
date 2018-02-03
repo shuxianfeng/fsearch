@@ -103,7 +103,9 @@ public class PostIndexer implements Indexer {
                         //针对圈子名称，即name，这个字段做 特殊处理
                         if (key.equals("name")) {
                             key = "circlename";
+                            System.out.println("circlename????>>" + key);
                         }
+
                         if (key.equals("category")) {
                             System.out.println("category>>" + key);
                         }
