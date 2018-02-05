@@ -105,6 +105,7 @@ public class SearchServlet extends HttpServlet {
 		String api = kv.get(KEY_API);
 		switch (api) {
 			case "search":
+				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>进入搜索中");
 				return search(request);
 			case "document_add":
 				return saveDocument(request, false);
