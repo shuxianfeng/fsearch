@@ -256,6 +256,7 @@ public class SearchServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		System.out.print("post请求。。。。。。。。。。。。。。。。。。");
 		handleRequest(request, response);
 	}
 
