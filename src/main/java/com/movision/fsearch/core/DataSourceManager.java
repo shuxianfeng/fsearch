@@ -26,9 +26,6 @@ public class DataSourceManager {
 			ds.setAcquireIncrement(config.getInt("db.acquireIncrement"));
 			ds.setAcquireRetryAttempts(config.getInt("db.acquireRetryAttempts"));
 			ds.setMaxIdleTime(config.getInt("db.maxIdleTime"));
-			ds.setIdleConnectionTestPeriod(config.getInt("db.idleConnectionTestPeriod"));
-			ds.setTestConnectionOnCheckin(false);
-			ds.setTestConnectionOnCheckout(true);
 			jdbcTemplate = new JdbcTemplate();
 			jdbcTemplate.setDataSource(ds);
 		} catch (Throwable e) {
